@@ -302,6 +302,16 @@ class Patch
 {
 	static string[]? originalOptionList;
 
+	static void UpdateAvailableLangauages()
+	{
+		logger.LogDebug("Patched available languages");
+
+		foreach (var lang in languageReader.LanguageList)
+		{
+			Language._availableLanguages.AddIfNotPresent(lang.ToString());
+		}
+	}
+
 	[HarmonyPrefix]
 	[HarmonyPatch(typeof(Language), nameof(Language.GetLanguageFileContents))]
 	static bool GetLanguageFileContents(string sheetTitle, ref string __result)
@@ -348,12 +358,14 @@ class Patch
 	[HarmonyPatch(typeof(Language), nameof(Language.LoadAvailableLanguages))]
 	static void LoadAvailableLanguages()
 	{
-		logger.LogDebug("Patched available languages");
-		
-		foreach (var lang in languageReader.LanguageList)
-		{
-			Language._availableLanguages.AddIfNotPresent(lang.ToString());
-		}
+		UpdateAvailableLangauages();
+	}
+
+	[HarmonyPrefix]
+	[HarmonyPatch(typeof(Language), nameof(Language.RestoreLanguageSelection))]
+	static void RestoreLanguageSelection()
+	{
+		UpdateAvailableLangauages();
 	}
 
 	[HarmonyPostfix]
