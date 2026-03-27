@@ -375,6 +375,8 @@ class Patch
 			GameManager.instance.gameSettings.gameLanguage = GlobalEnums.SupportedLanguages.EN;
 			Instance.GlobalData?.Language = languageReader.LanguageList[__instance.selectedOptionIndex - MenuLanguageSetting.langs.Length];
 		}
+
+		Language.SwitchLanguage(Instance.GlobalData!.Language);
 		__instance.gm.RefreshLocalization();
 		__instance.UpdateText();
 
