@@ -374,10 +374,12 @@ class Patch
 	{
 		logger.LogDebug("Patched language array");
 		originalOptionList ??= [.. MenuLanguageSetting.optionList];
+		
 		MenuLanguageSetting.optionList = [
 			.. originalOptionList,
 			.. languageReader.LanguageList
 				.Select(lang => lang.ToString())
+				.Where(lang => !originalOptionList.Any(og_lang => lang == og_lang))
 		];
 	}
 
