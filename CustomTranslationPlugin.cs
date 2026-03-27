@@ -79,14 +79,14 @@ public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<G
 
 				if (languageReader.ContainsKey(metadata.Language))
 				{
-					logger.LogWarning($"Found duplicate entries for \"{metadata.Language}\" (\"{languageReader[metadata.Language].entry.location.Name}\" and \"{entry.location.Name}\"). Use \"{entry.location.Name}\".");
+					logger.LogWarning($"Found duplicate entries for '{metadata.Language}' ('{languageReader[metadata.Language].entry.location.Name}' and '{entry.location.Name}'). Use '{entry.location.Name}'.");
 				}
 				
 				languageReader[metadata.Language] = translation;
 			}
 			catch (Exception e)
 			{
-				logger.LogWarning($"Failed to load entry at \"{entry.location.Name}\": {e.Message}");
+				logger.LogWarning($"Failed to load entry at '{entry.location.Name}': {e.Message}");
 			}
 		}
 
@@ -415,7 +415,7 @@ class Patch
 			__result = lang.ToString();
 		}
 
-		logger.LogInfo($"Loaded Language: {__result}");
+		logger.LogInfo($"Loaded language: {__result}");
 	}
 }
 #pragma warning restore HARMONIZE003
