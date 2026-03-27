@@ -227,7 +227,7 @@ public class Translation(TranslationMetadata metadata, TranslationEntry entry)
 				return "";
 			}
 
-			var sr = new StreamReader(Path.Combine(entry.location.FullName, filename.Name));
+			using var sr = new StreamReader(Path.Combine(entry.location.FullName, filename.Name));
 			if (entry.kind == TranslationFileKind.Splitted)
 			{
 				return sr.ReadToEnd();
