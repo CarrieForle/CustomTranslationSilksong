@@ -76,6 +76,12 @@ public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<G
 			{
 				var metadata = TranslationMetadata.ReadFrom(entry);
 				var translation = new Translation(metadata, entry);
+
+				if (languageReader.ContainsKey(metadata.Language))
+				{
+					logger.LogWarning($"Found duplicate entries for \"{metadata.Language}\" (\"{languageReader[metadata.Language].entry.location.Name}\" and \"{entry.location.Name}\"). Use \"{entry.location.Name}\".");
+				}
+				
 				languageReader[metadata.Language] = translation;
 			}
 			catch (Exception e)
