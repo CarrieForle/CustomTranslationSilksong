@@ -295,6 +295,7 @@ where T : Enum
 class Patch
 {
 	static string[]? originalOptionList;
+
 	[HarmonyPrefix]
 	[HarmonyPatch(typeof(Language), nameof(Language.GetLanguageFileContents))]
 	static bool GetLanguageFileContents(string sheetTitle, ref string __result)
@@ -342,9 +343,11 @@ class Patch
 	static void LoadAvailableLanguages()
 	{
 		logger.LogDebug("Patched available languages");
-		var languages = languageReader.LanguageList
-			.Select(lang => lang.ToString());
-		Language._availableLanguages.AddRange(languages);
+		
+		foreach (var lang in languageReader.LanguageList)
+		{
+			Language._availableLanguages.AddIfNotPresent(lang.ToString());
+		}
 	}
 
 	[HarmonyPostfix]
@@ -352,8 +355,7 @@ class Patch
 	static void UpdateLangsArray()
 	{
 		logger.LogDebug("Patched language array");
-		originalOptionList ??= (string[])MenuLanguageSetting.optionList.Clone();
-
+		originalOptionList ??= [.. MenuLanguageSetting.optionList];
 		MenuLanguageSetting.optionList = [
 			.. originalOptionList,
 			.. languageReader.LanguageList
