@@ -96,7 +96,7 @@ public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<G
 		}
 		else
 		{
-			Logger.LogInfo($"Found {entries.Count} entries: {string.Join(", ", languageReader.LanguageList)}");
+			Logger.LogInfo($"Found {entries.Count} entries. Loaded {languageReader.Count} entries: {string.Join(", ", languageReader.LanguageList)}");
 		}
 	}
 	
@@ -251,6 +251,7 @@ public class LanguageReader
 	private readonly SortedList<LanguageCode, Translation> languages = new(EnumComparer<LanguageCode>.Default);
 	private readonly Dictionary<LanguageCode, bool> isLanguageRead = [];
 	public IList<LanguageCode> LanguageList => languages.Keys;
+	public int Count => languages.Count;
 
 	public Translation this[LanguageCode lang]
 	{
