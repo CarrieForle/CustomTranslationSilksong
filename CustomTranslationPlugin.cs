@@ -86,11 +86,11 @@ public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<G
 
 		if (entries.Count == 0)
 		{
-			base.Logger.LogInfo("No entry loaded.");
+			Logger.LogInfo("No entry loaded.");
 		}
 		else
 		{
-			base.Logger.LogInfo($"Found {entries.Count} entries: {string.Join(",", languageReader.LanguageList)}");
+			Logger.LogInfo($"Found {entries.Count} entries: {string.Join(", ", languageReader.LanguageList)}");
 		}
 	}
 	
