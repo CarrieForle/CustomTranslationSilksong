@@ -1,6 +1,9 @@
 using System;
 using System.Diagnostics;
+using System.IO;
+using System.Runtime.Serialization;
 using BepInEx.Logging;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using TeamCherry.Localization;
 
@@ -11,6 +14,14 @@ public class Text
 	public static LocalisedString Localized(string key)
 	{
 		return new LocalisedString($"Mods.{CustomTranslationPlugin.Id}", key);
+	}
+
+	public static T? FromJson<T>(string path)
+	{
+		using var sr = new StreamReader(path);
+		using var reader = new JsonTextReader(sr);
+		var serializer = new JsonSerializer();
+		return serializer.Deserialize<T>(reader);
 	}
 }
 

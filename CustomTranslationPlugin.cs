@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Xml;
 using TeamCherry.Localization;
 using TeamCherry.SharedUtils;
 using UnityEngine.UI;
@@ -37,7 +38,7 @@ public enum TranslationFileKind
 [BepInAutoPlugin(id: "io.github.carrieforle.customtranslation", name: "Custom Translation")]
 public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<GlobalData>
 {
-	public const string ENTRY_FILENAME = "entry.txt";
+	public const string ENTRY_FILENAME = "entry.json";
 	public const string METADATA_FILENAME = "metadata.json";
 	public static LanguageReader languageReader = new();
 	public static DirectoryInfo translationDir;
@@ -50,7 +51,7 @@ public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<G
 			globalData ??= new();
 			return globalData;
 		}
-		set => globalData = value!; 
+		set => globalData = value!;
 	}
 	public static CustomTranslationPlugin Instance;
 
@@ -70,7 +71,7 @@ public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<G
 
 		}
 
-		var entries = ListTranslationDirectories();
+		var entries = GetTranslationEntries();
 
 		foreach (var entry in entries)
 		{
@@ -83,7 +84,7 @@ public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<G
 				{
 					logger.LogWarning($"Found duplicate entries for '{metadata.Language}' ('{languageReader[metadata.Language].entry.location.Name}' and '{entry.location.Name}'). Use '{entry.location.Name}'.");
 				}
-				
+
 				languageReader[metadata.Language] = translation;
 			}
 			catch (Exception e)
@@ -101,13 +102,13 @@ public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<G
 			Logger.LogInfo($"Found {entries.Count} entries. Loaded {languageReader.Count} entries: {string.Join(", ", languageReader.LanguageList)}");
 		}
 	}
-	
+
 	private void Start()
 	{
 		GlobalData ??= new GlobalData();
 	}
 
-	private IList<TranslationEntry> ListTranslationDirectories()
+	private IList<TranslationEntry> GetTranslationEntries()
 	{
 		List<TranslationEntry> res = [];
 		var dirs = translationDir.GetDirectories();
@@ -183,8 +184,7 @@ public class TranslationMetadata
 
 	public static TranslationMetadata ReadFrom(TranslationEntry entry)
 	{
-		using var sr = new StreamReader(Path.Combine(entry.location.FullName, METADATA_FILENAME));
-		var res = JsonConvert.DeserializeObject<TranslationMetadata>(sr.ReadToEnd());
+		var res = Text.FromJson<TranslationMetadata>(Path.Combine(entry.location.FullName, METADATA_FILENAME));
 
 		if (res is null || res.Language == LanguageCode.N)
 		{
@@ -200,42 +200,79 @@ public class Translation(TranslationMetadata metadata, TranslationEntry entry)
 	public readonly TranslationMetadata metadata = metadata;
 	public readonly TranslationEntry entry = entry;
 
-	public string LoadTranslationText(string sheet)
+	public bool TryLoadTranslationText()
 	{
-		if (entry.kind == TranslationFileKind.Single)
+		try
 		{
-			using var sr = new StreamReader(Path.Combine(entry.location.FullName, ENTRY_FILENAME));
-			return sr.ReadToEnd();
+			if (entry.kind == TranslationFileKind.Single)
+			{
+				var content = Text.FromJson<Dictionary<string, Dictionary<string, string>>>(Path.Combine(entry.location.FullName, ENTRY_FILENAME));
+
+				if (content is null)
+				{
+					throw new CustomTranslationException("JSON is null");
+				}
+
+				foreach (string sheet in Language.Settings.sheetTitles)
+				{
+					Language._currentEntrySheets[sheet] = [];
+					if (content.TryGetValue(sheet, out var sheetContent))
+					{
+						foreach ((string key, string text) in sheetContent)
+						{
+							Language._currentEntrySheets[sheet][key] = text;
+						}
+					}
+				}
+			}
+			else
+			{
+				var files = entry.location.GetFiles();
+				foreach (string sheet in Language.Settings.sheetTitles)
+				{
+					Language._currentEntrySheets[sheet] = [];
+					Regex pattern;
+					if (entry.kind == TranslationFileKind.Splitted)
+					{
+						pattern = new Regex(@$"[a-zA-Z_]+?{sheet}.txt");
+					}
+					else
+					{
+						pattern = new Regex(@$"[a-zA-Z_]+?{sheet}.bytes");
+					}
+
+					FileInfo? filename = files.FirstOrDefault(f => pattern.IsMatch(f.Name));
+
+					using var sr = new StreamReader(Path.Combine(entry.location.FullName, filename.Name));
+					string fileContent;
+					if (entry.kind == TranslationFileKind.Splitted)
+					{
+						fileContent = sr.ReadToEnd();
+					}
+					else
+					{
+						fileContent = Encryption.Decrypt(sr.ReadToEnd());
+					}
+
+					using var xmlReader = XmlReader.Create(new StringReader(fileContent));
+					while (xmlReader.ReadToFollowing("entry"))
+					{
+						xmlReader.MoveToFirstAttribute();
+						string value = xmlReader.Value;
+						xmlReader.MoveToElement();
+						string text2 = xmlReader.ReadElementContentAsString().Trim();
+						text2 = text2.UnescapeXml();
+						Language._currentEntrySheets[sheet][value] = text2;
+					}
+				}
+			}
+
+			return true;
 		}
-		else
+		catch (Exception ex)
 		{
-			var files = entry.location.GetFiles();
-			Regex pattern;
-			if (entry.kind == TranslationFileKind.Splitted)
-			{
-				pattern = new Regex(@$"[a-zA-Z_]+?{sheet}.txt");
-			}
-			else
-			{
-				pattern = new Regex(@$"[a-zA-Z_]+?{sheet}.bytes");
-			}
-
-			FileInfo? filename = files.FirstOrDefault(f => pattern.IsMatch(f.Name));
-
-			if (filename is null)
-			{
-				return "";
-			}
-
-			using var sr = new StreamReader(Path.Combine(entry.location.FullName, filename.Name));
-			if (entry.kind == TranslationFileKind.Splitted)
-			{
-				return sr.ReadToEnd();
-			}
-			else
-			{
-				return Encryption.Decrypt(sr.ReadToEnd());
-			}
+			logger.LogError($"Error while loading \"{entry.location.Name}\" entry: {ex.Message}");
+			return false;
 		}
 	}
 }
@@ -243,43 +280,18 @@ public class Translation(TranslationMetadata metadata, TranslationEntry entry)
 public class LanguageReader
 {
 	private readonly SortedList<LanguageCode, Translation> languages = new(EnumComparer<LanguageCode>.Default);
-	private readonly Dictionary<LanguageCode, bool> isLanguageRead = [];
 	public IList<LanguageCode> LanguageList => languages.Keys;
 	public int Count => languages.Count;
 
 	public Translation this[LanguageCode lang]
 	{
 		get => languages[lang];
-		set
-		{
-			languages[lang] = value;
-			isLanguageRead[lang] = false;
-		}
+		set => languages[lang] = value;
 	}
 
 	public bool ContainsKey(LanguageCode key)
 	{
 		return languages.ContainsKey(key);
-	}
-
-	public string Load(LanguageCode lang, string sheet)
-	{
-		// Language.GetLanguageFileContents loops reading via sheet.
-		// So we don't over-read it.
-		if (languages[lang].entry.kind == TranslationFileKind.Single && isLanguageRead[lang])
-		{
-			return "";
-		}
-
-		return languages[lang].LoadTranslationText(sheet);
-	}
-
-	public void ResetRead()
-	{
-		foreach (var lang in isLanguageRead.Keys.ToArray())
-		{
-			isLanguageRead[lang] = false;
-		}
 	}
 }
 
@@ -308,19 +320,6 @@ class Patch
 	}
 
 	[HarmonyPrefix]
-	[HarmonyPatch(typeof(Language), nameof(Language.GetLanguageFileContents))]
-	static bool GetLanguageFileContents(string sheetTitle, ref string __result)
-	{
-		if (languageReader.ContainsKey(Language._currentLanguage))
-		{
-			__result = languageReader.Load(Language._currentLanguage, sheetTitle);
-			return false;
-		}
-
-		return true;
-	}
-
-	[HarmonyPrefix]
 	[HarmonyPatch(typeof(Language), nameof(Language.DoSwitch))]
 	static bool DoSwitch(LanguageCode newLang)
 	{
@@ -336,17 +335,10 @@ class Patch
 		foreach (string text in Language.Settings.sheetTitles)
 		{
 			Language._currentEntrySheets[text] = new Dictionary<string, string>();
-
-			string newLanguageFileContents = "";
-			if (languageReader.ContainsKey(newLang))
-			{
-				newLanguageFileContents = languageReader[newLang].LoadTranslationText(text);
-			}
-
 			string languageFileContents = Language.GetLanguageFileContents(text);
 			if (!string.IsNullOrEmpty(languageFileContents))
 			{
-				using (System.Xml.XmlReader xmlReader = System.Xml.XmlReader.Create(new StringReader(languageFileContents)))
+				using (XmlReader xmlReader = XmlReader.Create(new StringReader(languageFileContents)))
 				{
 					while (xmlReader.ReadToFollowing("entry"))
 					{
@@ -359,22 +351,11 @@ class Patch
 					}
 				}
 			}
+		}
 
-			if (!string.IsNullOrEmpty(newLanguageFileContents))
-			{
-				using (System.Xml.XmlReader xmlReader = System.Xml.XmlReader.Create(new StringReader(newLanguageFileContents)))
-				{
-					while (xmlReader.ReadToFollowing("entry"))
-					{
-						xmlReader.MoveToFirstAttribute();
-						string value = xmlReader.Value;
-						xmlReader.MoveToElement();
-						string text2 = xmlReader.ReadElementContentAsString().Trim();
-						text2 = text2.UnescapeXml();
-						Language._currentEntrySheets[text][value] = text2;
-					}
-				}
-			}
+		if (languageReader.ContainsKey(newLang))
+		{
+			languageReader[newLang].TryLoadTranslationText();
 		}
 
 		Language._currentLanguage = newLang;
@@ -386,13 +367,6 @@ class Patch
 		Language.SendMonoMessage("ChangedLanguage", new object[] { Language._currentLanguage });
 
 		return false;
-	}
-
-	[HarmonyPostfix]
-	[HarmonyPatch(typeof(Language), nameof(Language.DoSwitch))]
-	static void ResetRead()
-	{
-		languageReader.ResetRead();
 	}
 
 	[HarmonyPrefix]
@@ -437,7 +411,7 @@ class Patch
 	{
 		logger.LogDebug("Patched language array");
 		originalOptionList ??= [.. MenuLanguageSetting.optionList];
-		
+
 		MenuLanguageSetting.optionList = [
 			.. originalOptionList,
 			.. languageReader.LanguageList
