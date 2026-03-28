@@ -2,7 +2,6 @@ using System.Diagnostics;
 using Silksong.ModMenu.Elements;
 using Silksong.ModMenu.Plugin;
 using Silksong.ModMenu.Screens;
-using TeamCherry.Localization;
 using UnityEngine.UI;
 
 namespace CustomTranslation;
