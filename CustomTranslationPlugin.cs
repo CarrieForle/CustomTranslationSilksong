@@ -412,5 +412,21 @@ class Patch
 
 		logger.LogInfo($"Loaded language: {__result}");
 	}
+
+	[HarmonyPostfix]
+	[HarmonyPatch(typeof(MenuLanguageSetting), nameof(MenuLanguageSetting.RefreshCurrentIndex))]
+	static void PatchCurrentIndex(MenuLanguageSetting __instance)
+	{
+		if (!MenuLanguageSetting.languageCodeToSupportedLanguages.ContainsKey(Language._currentLanguage) &&
+			languageReader.ContainsKey(Language._currentLanguage))
+		{
+			int index = MenuLanguageSetting.optionList.IndexOf(Language._currentLanguage.ToString());
+			if (index != -1)
+			{
+				__instance.selectedOptionIndex = index;
+				__instance.currentActiveIndex = index;
+			}
+		}
+	}
 }
 #pragma warning restore HARMONIZE003
