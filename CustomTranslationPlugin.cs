@@ -113,7 +113,6 @@ public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<G
 		var dirs = translationDir.GetDirectories();
 		foreach (var dir in dirs)
 		{
-
 			if (!File.Exists(Path.Combine(dir.FullName, METADATA_FILENAME)))
 			{
 				continue;
@@ -162,8 +161,6 @@ public class GlobalData
 	public LanguageCode Language;
 }
 
-
-
 public record TranslationEntry
 {
 	public DirectoryInfo location;
@@ -172,7 +169,6 @@ public record TranslationEntry
 
 public class TranslationMetadata
 {
-
 	[JsonConverter(typeof(StringEnumConverter))]
 	public LanguageCode Language { get; set; }
 
