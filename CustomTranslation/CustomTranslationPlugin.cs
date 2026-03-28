@@ -200,27 +200,31 @@ public class Translation(TranslationMetadata metadata, TranslationEntry entry)
 	public readonly TranslationMetadata metadata = metadata;
 	public readonly TranslationEntry entry = entry;
 
-	public bool TryLoadTranslationText()
+	public bool UpdateSheet()
 	{
 		try
 		{
 			if (entry.kind == TranslationFileKind.Single)
 			{
-				var content = Text.FromJson<Dictionary<string, Dictionary<string, string>>>(Path.Combine(entry.location.FullName, ENTRY_FILENAME));
+				var fileContent = Text.FromJson<Dictionary<string, Dictionary<string, string>>>(Path.Combine(entry.location.FullName, ENTRY_FILENAME));
 
-				if (content is null)
+				if (fileContent is null)
 				{
 					throw new CustomTranslationException("JSON is null");
 				}
 
 				foreach (string sheet in Language.Settings.sheetTitles)
 				{
-					Language._currentEntrySheets[sheet] = [];
-					if (content.TryGetValue(sheet, out var sheetContent))
+					if (!Language._currentEntrySheets.TryGetValue(sheet, out var sheetDict))
+					{
+						sheetDict = [];
+						Language._currentEntrySheets[sheet] = sheetDict;
+					}
+					if (fileContent.TryGetValue(sheet, out var sheetContent))
 					{
 						foreach ((string key, string text) in sheetContent)
 						{
-							Language._currentEntrySheets[sheet][key] = text;
+							sheetDict[key] = text;
 						}
 					}
 				}
@@ -230,7 +234,12 @@ public class Translation(TranslationMetadata metadata, TranslationEntry entry)
 				var files = entry.location.GetFiles();
 				foreach (string sheet in Language.Settings.sheetTitles)
 				{
-					Language._currentEntrySheets[sheet] = [];
+					if (!Language._currentEntrySheets.TryGetValue(sheet, out var sheetDict))
+					{
+						sheetDict = [];
+						Language._currentEntrySheets[sheet] = sheetDict;
+					}
+
 					Regex pattern;
 					if (entry.kind == TranslationFileKind.Splitted)
 					{
@@ -262,7 +271,7 @@ public class Translation(TranslationMetadata metadata, TranslationEntry entry)
 						xmlReader.MoveToElement();
 						string text2 = xmlReader.ReadElementContentAsString().Trim();
 						text2 = text2.UnescapeXml();
-						Language._currentEntrySheets[sheet][value] = text2;
+						sheetDict[value] = text2;
 					}
 				}
 			}
@@ -355,7 +364,7 @@ class Patch
 
 		if (languageReader.ContainsKey(newLang))
 		{
-			languageReader[newLang].TryLoadTranslationText();
+			languageReader[newLang].UpdateSheet();
 		}
 
 		Language._currentLanguage = newLang;
@@ -436,7 +445,8 @@ class Patch
 		}
 
 		Language.SwitchLanguage(Instance.GlobalData!.Language);
-		__instance.gm.RefreshLocalization();
+		// __instance.gm is not initialized until the language menu is opened once, but this might be called from modmenu before it happened.
+		GameManager.instance.RefreshLocalization(); 
 		__instance.UpdateText();
 
 		return false;
