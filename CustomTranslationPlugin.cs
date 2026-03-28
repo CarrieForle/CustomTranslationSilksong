@@ -172,6 +172,9 @@ public class TranslationMetadata
 	[JsonConverter(typeof(StringEnumConverter))]
 	public LanguageCode Language { get; set; }
 
+	[JsonConverter(typeof(StringEnumConverter))]
+	public LanguageCode FallbackLanguage { get; set; } = LanguageCode.EN;
+
 	[JsonConstructor]
 	public TranslationMetadata(LanguageCode language)
 	{
@@ -315,6 +318,74 @@ class Patch
 		}
 
 		return true;
+	}
+
+	[HarmonyPrefix]
+	[HarmonyPatch(typeof(Language), nameof(Language.DoSwitch))]
+	static bool DoSwitch(LanguageCode newLang)
+	{
+		TeamCherry.Localization.LocalizationProjectSettings.OnSwitchedLanguage(newLang);
+		Language._currentLanguage = newLang;
+		Language._currentEntrySheets = new Dictionary<string, Dictionary<string, string>>();
+
+		if (languageReader.ContainsKey(newLang))
+		{
+			Language._currentLanguage = languageReader[newLang].metadata.FallbackLanguage;
+		}
+
+		foreach (string text in Language.Settings.sheetTitles)
+		{
+			Language._currentEntrySheets[text] = new Dictionary<string, string>();
+
+			string newLanguageFileContents = "";
+			if (languageReader.ContainsKey(newLang))
+			{
+				newLanguageFileContents = languageReader[newLang].LoadTranslationText(text);
+			}
+
+			string languageFileContents = Language.GetLanguageFileContents(text);
+			if (!string.IsNullOrEmpty(languageFileContents))
+			{
+				using (System.Xml.XmlReader xmlReader = System.Xml.XmlReader.Create(new StringReader(languageFileContents)))
+				{
+					while (xmlReader.ReadToFollowing("entry"))
+					{
+						xmlReader.MoveToFirstAttribute();
+						string value = xmlReader.Value;
+						xmlReader.MoveToElement();
+						string text2 = xmlReader.ReadElementContentAsString().Trim();
+						text2 = text2.UnescapeXml();
+						Language._currentEntrySheets[text][value] = text2;
+					}
+				}
+			}
+
+			if (!string.IsNullOrEmpty(newLanguageFileContents))
+			{
+				using (System.Xml.XmlReader xmlReader = System.Xml.XmlReader.Create(new StringReader(newLanguageFileContents)))
+				{
+					while (xmlReader.ReadToFollowing("entry"))
+					{
+						xmlReader.MoveToFirstAttribute();
+						string value = xmlReader.Value;
+						xmlReader.MoveToElement();
+						string text2 = xmlReader.ReadElementContentAsString().Trim();
+						text2 = text2.UnescapeXml();
+						Language._currentEntrySheets[text][value] = text2;
+					}
+				}
+			}
+		}
+
+		Language._currentLanguage = newLang;
+		LocalizedAsset[] array = (LocalizedAsset[])UnityEngine.Object.FindObjectsOfType(typeof(LocalizedAsset));
+		for (int i = 0; i < array.Length; i++)
+		{
+			array[i].LocalizeAsset();
+		}
+		Language.SendMonoMessage("ChangedLanguage", new object[] { Language._currentLanguage });
+
+		return false;
 	}
 
 	[HarmonyPostfix]
