@@ -55,7 +55,7 @@ jobs:
       id: thunderstore-artifact
       uses: actions/upload-artifact@v7
       with:
-        path: thunderstore/dist/*.zip
+        path: CustomTranslation/thunderstore/dist/*.zip
         archive: false
     - name: Upload nuget artifact
       id: nuget-artifact
@@ -116,13 +116,13 @@ jobs:
       uses: actions/download-artifact@v8
       with:
         artifact-ids: ${{ needs.build.outputs.thunderstore-artifact-id }}
-        path: thunderstore/dist
+        path: CustomTranslation/thunderstore/dist
         skip-decompress: true
     - name: Publish to Thunderstore
       run: |-
         dotnet tcli publish \
-          --config-path thunderstore/thunderstore.toml \
-          --file thunderstore/dist/*.zip \
+          --config-path CustomTranslation/thunderstore/thunderstore.toml \
+          --file CustomTranslation/thunderstore/dist/*.zip \
           --token $THUNDERSTORE_API_KEY
 
   # Publish to NuGet so that other mods can depend on it in CI
@@ -190,7 +190,7 @@ jobs:
         body: |
           Build attested at ${{ needs.build.outputs.attestation-url }}
         files: |
-          thunderstore/dist/*.zip
+          CustomTranslation/thunderstore/dist/*.zip
 
   secret-check:
     runs-on: ubuntu-latest

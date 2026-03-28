@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.37111.16 d17.14
+VisualStudioVersion = 17.14.37111.16
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomTranslation", "CustomTranslation.csproj", "{68709067-5BB8-9A67-9735-0E8ACA856EAB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomTranslation", "CustomTranslation\CustomTranslation.csproj", "{CF2218B5-BAF8-B32F-7E53-5B34D2113CDF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +11,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{68709067-5BB8-9A67-9735-0E8ACA856EAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{68709067-5BB8-9A67-9735-0E8ACA856EAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{68709067-5BB8-9A67-9735-0E8ACA856EAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{68709067-5BB8-9A67-9735-0E8ACA856EAB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF2218B5-BAF8-B32F-7E53-5B34D2113CDF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF2218B5-BAF8-B32F-7E53-5B34D2113CDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF2218B5-BAF8-B32F-7E53-5B34D2113CDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF2218B5-BAF8-B32F-7E53-5B34D2113CDF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
