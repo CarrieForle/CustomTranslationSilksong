@@ -1,8 +1,18 @@
-
 using System;
 using System.Diagnostics;
 using BepInEx.Logging;
 using Newtonsoft.Json.Serialization;
+using TeamCherry.Localization;
+
+namespace CustomTranslation;
+
+public class Text
+{
+	public static LocalisedString Localized(string key)
+	{
+		return new LocalisedString($"Mods.{CustomTranslationPlugin.Id}", key);
+	}
+}
 
 public class BepinExTraceWriter(ManualLogSource logger) : ITraceWriter
 {

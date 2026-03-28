@@ -31,14 +31,16 @@ public enum TranslationFileKind
 /// Localization codes mostly work with LanguageCode which allows us to work with unsupported language. SupportedLangauges work with saved option and UI.
 /// 
 /// </summary>
+[BepInDependency("org.silksong-modding.modmenu")]
 [BepInDependency("org.silksong-modding.datamanager")]
-[BepInAutoPlugin(id: "io.github.carrieforle.customtranslation")]
+[BepInDependency("org.silksong-modding.i18n")]
+[BepInAutoPlugin(id: "io.github.carrieforle.customtranslation", name: "Custom Translation")]
 public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<GlobalData>
 {
 	public const string ENTRY_FILENAME = "entry.txt";
 	public const string METADATA_FILENAME = "metadata.json";
 	public static LanguageReader languageReader = new();
-	private DirectoryInfo translationDir;
+	public static DirectoryInfo translationDir;
 	internal static ManualLogSource logger;
 	private GlobalData globalData;
 	public GlobalData? GlobalData
@@ -160,14 +162,7 @@ public class GlobalData
 	public LanguageCode Language;
 }
 
-public class CustomTranslationException : Exception
-{
-	public CustomTranslationException(string message)
-		: base(message)
-	{
 
-	}
-}
 
 public record TranslationEntry
 {
@@ -303,7 +298,7 @@ class Patch
 {
 	static string[]? originalOptionList;
 
-	static void UpdateAvailableLangauages()
+	public static void UpdateAvailableLangauages()
 	{
 		logger.LogDebug("Patched available languages");
 
