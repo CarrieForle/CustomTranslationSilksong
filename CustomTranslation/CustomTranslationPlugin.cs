@@ -110,11 +110,12 @@ public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<G
 		// would've been too early to call its static constructor
 		// which causes gibberish text in the intro scene.
 		harmony.PatchAll(typeof(LanguagePatch));
+		Logger.LogInfo("Patched Language class");
 
 		// Apply LanguagePatch here will miss Language.DoSwitch()
 		// on game launch and cause the game not using the language 
 		// during intro, so we force the game to switch language here.
-		if (GlobalData?.Language is {} lang)
+		if (GlobalData?.Language is {} lang && languageReader.ContainsKey(lang))
 		{
 			Language.DoSwitch(lang);
 		}
@@ -446,6 +447,8 @@ class Patch
 		return false;
 	}
 
+	// An error of "Couldn't find currently active language" is logged from this
+	// function. This is normal and harmless.
 	[HarmonyPostfix]
 	[HarmonyPatch(typeof(MenuLanguageSetting), nameof(MenuLanguageSetting.RefreshCurrentIndex))]
 	static void PatchCurrentIndex(MenuLanguageSetting __instance)
