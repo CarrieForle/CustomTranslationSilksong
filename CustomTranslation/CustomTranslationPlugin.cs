@@ -107,8 +107,6 @@ public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<G
 
 	private void Start()
 	{
-		GlobalData ??= new GlobalData();
-		
 		// Language class cannot be patched in Awake() because it 
 		// would've been too early to call its static constructor
 		// which causes gibberish text in the intro scene.
