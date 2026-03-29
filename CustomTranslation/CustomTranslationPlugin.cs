@@ -54,7 +54,6 @@ public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<G
 		}
 		set => globalData = value!;
 	}
-	
 
 	private void Awake()
 	{
@@ -347,6 +346,7 @@ class LanguagePatch
 			array[i].LocalizeAsset();
 		}
 		Language.SendMonoMessage("ChangedLanguage", new object[] { Language._currentLanguage });
+		Instance.GlobalData?.Language = newLang;
 
 		return false;
 	}
@@ -416,18 +416,19 @@ class Patch
 	[HarmonyPatch(typeof(MenuLanguageSetting), nameof(MenuLanguageSetting.UpdateLanguageSetting))]
 	static bool UpdateLanguageSetting(MenuLanguageSetting __instance)
 	{
+		LanguageCode lang;
 		if (__instance.selectedOptionIndex < MenuLanguageSetting.langs.Length)
 		{
 			GameManager.instance.gameSettings.gameLanguage = MenuLanguageSetting.langs[__instance.selectedOptionIndex];
-			Instance.GlobalData?.Language = (LanguageCode)MenuLanguageSetting.langs[__instance.selectedOptionIndex];
+			lang = (LanguageCode)MenuLanguageSetting.langs[__instance.selectedOptionIndex];
 		}
 		else
 		{
 			GameManager.instance.gameSettings.gameLanguage = GlobalEnums.SupportedLanguages.EN;
-			Instance.GlobalData?.Language = languageReader.LanguageList[__instance.selectedOptionIndex - MenuLanguageSetting.langs.Length];
+			lang = languageReader.LanguageList[__instance.selectedOptionIndex - MenuLanguageSetting.langs.Length];
 		}
 
-		Language.SwitchLanguage(Instance.GlobalData!.Language);
+		Language.SwitchLanguage(lang);
 		// __instance.gm is not initialized until the language menu is opened once, but this might be called from modmenu before it happened.
 		GameManager.instance.RefreshLocalization();
 		__instance.UpdateText();
