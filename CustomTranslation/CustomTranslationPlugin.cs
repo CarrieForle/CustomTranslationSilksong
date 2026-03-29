@@ -106,11 +106,16 @@ public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<G
 
 	private void Start()
 	{
-		// Language class cannot be patched in Awake() because it 
+		// Language class cannot be patched in Awake() because it
 		// would've been too early to call its static constructor
 		// which causes gibberish text in the intro scene.
 		harmony.PatchAll(typeof(LanguagePatch));
 		Logger.LogInfo("Patched Language class");
+
+		// remove error "Loaded saved language code 'XX' is not an
+		// available language". There is still one same error
+		// that happens before patching.
+		LanguagePatch.LoadAvailableLanguages();
 
 		// Apply LanguagePatch here will miss Language.DoSwitch()
 		// on game launch and cause the game not using the language 
@@ -362,26 +367,22 @@ class LanguagePatch
 		return false;
 	}
 
-	[HarmonyPrefix]
-	[HarmonyPatch(typeof(Language), nameof(Language.SwitchLanguage), [typeof(LanguageCode)])]
-	static bool SwitchLanguage(LanguageCode code, ref bool __result)
-	{
-		if (languageReader.ContainsKey(code))
-		{
-			__result = true;
-			Language.DoSwitch(code);
-			return false;
-		}
-
-		return true;
-	}
-
 	[HarmonyPostfix]
 	[HarmonyPatch(typeof(Language), nameof(Language.GetLanguages))]
 	static void GetLanguages(ref string[] __result)
 	{
 		__result = [.. __result, .. languageReader.LanguageList
-		.Select(lang => lang.ToString())];
+			.Select(lang => lang.ToString())];
+	}
+
+	[HarmonyPostfix]
+	[HarmonyPatch(typeof(Language), nameof(Language.LoadAvailableLanguages))]
+	public static void LoadAvailableLanguages()
+	{
+		foreach (var lang in languageReader.LanguageList)
+		{
+			Language._availableLanguages.AddIfNotPresent(lang.ToString());
+		}
 	}
 
 	[HarmonyPostfix]
@@ -394,14 +395,6 @@ class LanguagePatch
 		}
 
 		logger.LogInfo($"Restored language: {__result}");
-	}
-
-	public static void UpdateAvailableLangauages()
-	{
-		foreach (var lang in languageReader.LanguageList)
-		{
-			Language._availableLanguages.AddIfNotPresent(lang.ToString());
-		}
 	}
 }
 
