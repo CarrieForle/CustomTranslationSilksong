@@ -121,34 +121,18 @@ public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<G
 
 			if (File.Exists(Path.Combine(dir.FullName, ENTRY_FILENAME)))
 			{
-				res.Add(new TranslationEntry
-				{
-					location = dir,
-					kind = TranslationFileKind.Single,
-				});
+				res.Add(new TranslationEntry(dir, TranslationFileKind.Single));
 				continue;
 			}
 
 			var files = dir.GetFiles();
-			if (Language.Settings.sheetTitles.Any(
-				sheet => files.Any(f => Regex.IsMatch(f.Name, @$"[a-zA-Z_]+?{sheet}\.txt"))
-			))
+			if (files.Any(f => f.Extension == ".txt"))
 			{
-				res.Add(new TranslationEntry
-				{
-					location = dir,
-					kind = TranslationFileKind.Splitted,
-				});
+				res.Add(new TranslationEntry(dir, TranslationFileKind.Splitted));
 			}
-			else if (Language.Settings.sheetTitles.Any(
-				sheet => files.Any(f => Regex.IsMatch(f.Name, @$"^[a-zA-Z_]+?{sheet}\.bytes"))
-			))
+			else if (files.Any(f => f.Extension == ".bytes"))
 			{
-				res.Add(new TranslationEntry
-				{
-					location = dir,
-					kind = TranslationFileKind.SplittedEncrypted,
-				});
+				res.Add(new TranslationEntry(dir, TranslationFileKind.SplittedEncrypted));
 			}
 		}
 
@@ -162,10 +146,10 @@ public class GlobalData
 	public LanguageCode Language;
 }
 
-public record TranslationEntry
+public record TranslationEntry(DirectoryInfo location, TranslationFileKind kind)
 {
-	public DirectoryInfo location;
-	public TranslationFileKind kind;
+	public DirectoryInfo location = location;
+	public TranslationFileKind kind = kind;
 }
 
 public class TranslationMetadata
