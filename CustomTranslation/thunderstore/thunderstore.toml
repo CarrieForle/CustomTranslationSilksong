@@ -22,7 +22,7 @@ silksong_modding-ModMenu = "0.4.5"
 # by other build scripts
 [build]
 icon = "./icon.png"
-readme = "../README.md"
+readme = "../../README.md"
 outdir = "./dist"
 
 [[build.copy]]

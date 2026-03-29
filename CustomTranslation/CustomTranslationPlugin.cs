@@ -42,9 +42,9 @@ public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<G
 	public static LanguageReader languageReader = new();
 	public static DirectoryInfo translationDir;
 	internal static ManualLogSource logger;
-	private GlobalData globalData;
+	public static CustomTranslationPlugin Instance;
 	private Harmony harmony;
-
+	private GlobalData globalData;
 	public GlobalData? GlobalData
 	{
 		get
@@ -54,7 +54,7 @@ public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<G
 		}
 		set => globalData = value!;
 	}
-	public static CustomTranslationPlugin Instance;
+	
 
 	private void Awake()
 	{
