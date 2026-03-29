@@ -110,6 +110,14 @@ public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<G
 		// would've been too early to call its static constructor
 		// which causes gibberish text in the intro scene.
 		harmony.PatchAll(typeof(LanguagePatch));
+
+		// Apply LanguagePatch here will miss Language.DoSwitch()
+		// on game launch and cause the game not using the language 
+		// during intro, so we force the game to switch language here.
+		if (GlobalData?.Language is {} lang)
+		{
+			Language.DoSwitch(lang);
+		}
 	}
 
 	private IList<TranslationEntry> GetTranslationEntries()
