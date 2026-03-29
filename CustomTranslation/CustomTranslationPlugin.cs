@@ -83,16 +83,16 @@ public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<G
 				var metadata = TranslationMetadata.ReadFrom(entry);
 				var translation = new Translation(metadata, entry);
 
-				if (languageReader.ContainsKey(metadata.Language))
+				if (languageReader.TryGetValue(metadata.Language, out var duplicated))
 				{
-					logger.LogWarning($"Found duplicate entries for '{metadata.Language}' ('{languageReader[metadata.Language].entry.location.Name}' and '{entry.location.Name}'). Use '{entry.location.Name}'.");
+					logger.LogWarning($"Found duplicate entries for '{metadata.Language}' ('{duplicated.entry.Name}' and '{entry.Name}'). Use '{entry.Name}'.");
 				}
 
 				languageReader[metadata.Language] = translation;
 			}
 			catch (Exception e)
 			{
-				logger.LogWarning($"Failed to load entry at '{entry.location.Name}': {e.Message}");
+				logger.LogWarning($"Failed to load entry at '{entry.Name}': {e.Message}");
 			}
 		}
 
@@ -158,6 +158,7 @@ public record TranslationEntry(DirectoryInfo location, TranslationFileKind kind)
 {
 	public DirectoryInfo location = location;
 	public TranslationFileKind kind = kind;
+	public string Name => location.Name;
 }
 
 public class TranslationMetadata
@@ -272,7 +273,7 @@ public class Translation(TranslationMetadata metadata, TranslationEntry entry)
 		}
 		catch (Exception ex)
 		{
-			logger.LogError($"Error while loading \"{entry.location.Name}\" entry: {ex.Message}");
+			logger.LogError($"Error while loading \"{entry.Name}\" entry: {ex.Message}");
 			return false;
 		}
 	}
@@ -293,6 +294,11 @@ public class LanguageReader
 	public bool ContainsKey(LanguageCode key)
 	{
 		return languages.ContainsKey(key);
+	}
+
+	public bool TryGetValue(LanguageCode key, out Translation translation)
+	{
+		return languages.TryGetValue(key, out translation);
 	}
 }
 
@@ -316,9 +322,9 @@ class LanguagePatch
 		Language._currentLanguage = newLang;
 		Language._currentEntrySheets = new Dictionary<string, Dictionary<string, string>>();
 
-		if (languageReader.ContainsKey(newLang))
+		if (languageReader.TryGetValue(newLang, out var translation))
 		{
-			Language._currentLanguage = languageReader[newLang].metadata.FallbackLanguage;
+			Language._currentLanguage = translation.metadata.FallbackLanguage;
 		}
 
 		foreach (string text in Language.Settings.sheetTitles)

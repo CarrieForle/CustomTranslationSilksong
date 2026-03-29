@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace CustomTranslation;
 
-public partial class CustomTranslationPlugin: IModMenuCustomElement
+public partial class CustomTranslationPlugin : IModMenuCustomElement
 {
 	public string ModMenuName()
 	{

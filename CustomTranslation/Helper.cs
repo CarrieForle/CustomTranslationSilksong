@@ -2,7 +2,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization;
 using BepInEx.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -15,6 +14,11 @@ public class Text
 	public static LocalisedString Localized(string key)
 	{
 		return new LocalisedString($"Mods.{CustomTranslationPlugin.Id}", key);
+	}
+
+	public static string Localized(string key, params object[] args)
+	{
+		return string.Format(Language.Get(key, $"Mods.{CustomTranslationPlugin.Id}"), args);
 	}
 
 	public static T? FromJson<T>(string path)
