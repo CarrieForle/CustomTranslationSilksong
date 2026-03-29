@@ -170,10 +170,10 @@ public record TranslationEntry
 
 public class TranslationMetadata
 {
-	[JsonConverter(typeof(StringEnumConverter))]
+	[JsonConverter(typeof(LanguageCodeConverter))]
 	public LanguageCode Language { get; set; }
 
-	[JsonConverter(typeof(StringEnumConverter))]
+	[JsonConverter(typeof(LanguageCodeConverter))]
 	public LanguageCode FallbackLanguage { get; set; } = LanguageCode.EN;
 
 	[JsonConstructor]

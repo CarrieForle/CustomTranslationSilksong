@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.Serialization;
 using BepInEx.Logging;
 using Newtonsoft.Json;
@@ -22,6 +23,29 @@ public class Text
 		using var reader = new JsonTextReader(sr);
 		var serializer = new JsonSerializer();
 		return serializer.Deserialize<T>(reader);
+	}
+}
+
+public class LanguageCodeConverter : JsonConverter
+{
+	public override bool CanRead { get; } = true;
+	public override bool CanWrite { get; } = false;
+	public override bool CanConvert(Type objectType)
+	{
+		return objectType == typeof(LanguageCode);
+	}
+
+	public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
+	{
+		throw new NotImplementedException();
+	}
+
+	public override object ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
+	{
+		string? val = (string?)reader.Value;
+		return Enum.GetValues(typeof(LanguageCode))
+			.Cast<LanguageCode>()
+			.First(lang => lang.ToString().Equals(val, StringComparison.OrdinalIgnoreCase));
 	}
 }
 
