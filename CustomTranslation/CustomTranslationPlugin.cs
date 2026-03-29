@@ -20,8 +20,7 @@ namespace CustomTranslation;
 public enum TranslationFileKind
 {
 	Single,
-	Splitted,
-	SplittedEncrypted,
+	Splitted
 }
 
 /// <summary>
@@ -120,6 +119,7 @@ public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<G
 	{
 		List<TranslationEntry> res = [];
 		var dirs = translationDir.GetDirectories();
+		string[] validExtensions = [".txt", ".bytes"];
 		foreach (var dir in dirs)
 		{
 			if (!File.Exists(Path.Combine(dir.FullName, METADATA_FILENAME)))
@@ -134,13 +134,9 @@ public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<G
 			}
 
 			var files = dir.GetFiles();
-			if (files.Any(f => f.Extension == ".txt"))
+			if (files.Any(f => validExtensions.IndexOf(f.Extension) != -1))
 			{
 				res.Add(new TranslationEntry(dir, TranslationFileKind.Splitted));
-			}
-			else if (files.Any(f => f.Extension == ".bytes"))
-			{
-				res.Add(new TranslationEntry(dir, TranslationFileKind.SplittedEncrypted));
 			}
 		}
 
@@ -233,27 +229,20 @@ public class Translation(TranslationMetadata metadata, TranslationEntry entry)
 						Language._currentEntrySheets[sheet] = sheetDict;
 					}
 
-					Regex pattern;
-					if (entry.kind == TranslationFileKind.Splitted)
-					{
-						pattern = new Regex(@$"[a-zA-Z_]+?{sheet}.txt");
-					}
-					else
-					{
-						pattern = new Regex(@$"[a-zA-Z_]+?{sheet}.bytes");
-					}
+					var pattern = new Regex(@$"[a-zA-Z_]+?{sheet}\.(?:txt|bytes)");
 
 					FileInfo? filename = files.FirstOrDefault(f => pattern.IsMatch(f.Name));
 
-					using var sr = new StreamReader(Path.Combine(entry.location.FullName, filename.Name));
-					string fileContent;
-					if (entry.kind == TranslationFileKind.Splitted)
+					if (filename is null)
 					{
-						fileContent = sr.ReadToEnd();
+						continue;
 					}
-					else
+
+					using var sr = new StreamReader(Path.Combine(entry.location.FullName, filename.Name));
+					string fileContent = sr.ReadToEnd();
+					if (!fileContent.Contains('<'))
 					{
-						fileContent = Encryption.Decrypt(sr.ReadToEnd());
+						fileContent = Encryption.Decrypt(fileContent);
 					}
 
 					using var xmlReader = XmlReader.Create(new StringReader(fileContent));
@@ -384,13 +373,6 @@ class LanguagePatch
 	{
 		__result = [.. __result, .. languageReader.LanguageList
 		.Select(lang => lang.ToString())];
-	}
-
-	[HarmonyPostfix]
-	[HarmonyPatch(typeof(Language), nameof(Language.LoadAvailableLanguages))]
-	static void LoadAvailableLanguages()
-	{
-		UpdateAvailableLangauages();
 	}
 
 	[HarmonyPostfix]
