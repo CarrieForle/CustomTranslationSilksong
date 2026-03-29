@@ -10,7 +10,7 @@ public partial class CustomTranslationPlugin: IModMenuCustomElement
 {
 	public string ModMenuName()
 	{
-		return "Custom Translation";
+		return Name;
 	}
 
 	public SelectableElement BuildCustomElement()

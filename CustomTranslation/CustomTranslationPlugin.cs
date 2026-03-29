@@ -44,6 +44,8 @@ public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<G
 	public static DirectoryInfo translationDir;
 	internal static ManualLogSource logger;
 	private GlobalData globalData;
+	private Harmony harmony;
+
 	public GlobalData? GlobalData
 	{
 		get
@@ -57,7 +59,8 @@ public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<G
 
 	private void Awake()
 	{
-		Harmony.CreateAndPatchAll(typeof(Patch), Id);
+		harmony = new Harmony(Id);
+		harmony.PatchAll(typeof(Patch));
 		logger = Logger;
 		translationDir = new DirectoryInfo(Path.Combine(Path.GetDirectoryName(Info.Location), "translation"));
 		Instance = this;
@@ -106,6 +109,11 @@ public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<G
 	private void Start()
 	{
 		GlobalData ??= new GlobalData();
+		
+		// Language class cannot be patched in Awake() because it 
+		// would've been too early to call its static constructor
+		// which causes gibberish text in the intro scene.
+		harmony.PatchAll(typeof(LanguagePatch));
 	}
 
 	private IList<TranslationEntry> GetTranslationEntries()
@@ -288,6 +296,7 @@ public class LanguageReader
 	}
 }
 
+#pragma warning disable HARMONIZE003
 class EnumComparer<T> : Comparer<T>
 where T : Enum
 {
@@ -297,21 +306,8 @@ where T : Enum
 	}
 }
 
-#pragma warning disable HARMONIZE003
-class Patch
+class LanguagePatch
 {
-	static string[]? originalOptionList;
-
-	public static void UpdateAvailableLangauages()
-	{
-		logger.LogDebug("Patched available languages");
-
-		foreach (var lang in languageReader.LanguageList)
-		{
-			Language._availableLanguages.AddIfNotPresent(lang.ToString());
-		}
-	}
-
 	[HarmonyPrefix]
 	[HarmonyPatch(typeof(Language), nameof(Language.DoSwitch))]
 	static bool DoSwitch(LanguageCode newLang)
@@ -391,18 +387,35 @@ class Patch
 		UpdateAvailableLangauages();
 	}
 
-	[HarmonyPrefix]
+	[HarmonyPostfix]
 	[HarmonyPatch(typeof(Language), nameof(Language.RestoreLanguageSelection))]
-	static void RestoreLanguageSelection()
+	static void RestoreLanguageFromGlobalData(ref string __result)
 	{
-		UpdateAvailableLangauages();
+		if (Instance.GlobalData?.Language is { } lang)
+		{
+			__result = lang.ToString();
+		}
+
+		logger.LogInfo($"Restored language: {__result}");
 	}
+
+	public static void UpdateAvailableLangauages()
+	{
+		foreach (var lang in languageReader.LanguageList)
+		{
+			Language._availableLanguages.AddIfNotPresent(lang.ToString());
+		}
+	}
+}
+
+class Patch
+{
+	static string[]? originalOptionList;
 
 	[HarmonyPostfix]
 	[HarmonyPatch(typeof(MenuLanguageSetting), nameof(MenuLanguageSetting.UpdateLangsArray))]
 	static void UpdateLangsArray()
 	{
-		logger.LogDebug("Patched language array");
 		originalOptionList ??= [.. MenuLanguageSetting.optionList];
 
 		MenuLanguageSetting.optionList = [
@@ -430,22 +443,10 @@ class Patch
 
 		Language.SwitchLanguage(Instance.GlobalData!.Language);
 		// __instance.gm is not initialized until the language menu is opened once, but this might be called from modmenu before it happened.
-		GameManager.instance.RefreshLocalization(); 
+		GameManager.instance.RefreshLocalization();
 		__instance.UpdateText();
 
 		return false;
-	}
-
-	[HarmonyPostfix]
-	[HarmonyPatch(typeof(Language), nameof(Language.RestoreLanguageSelection))]
-	static void RestoreLanguageFromGlobalData(ref string __result)
-	{
-		if (Instance.GlobalData?.Language is { } lang)
-		{
-			__result = lang.ToString();
-		}
-
-		logger.LogInfo($"Loaded language: {__result}");
 	}
 
 	[HarmonyPostfix]
