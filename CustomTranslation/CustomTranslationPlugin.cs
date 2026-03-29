@@ -44,7 +44,7 @@ public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<G
 	internal static ManualLogSource logger;
 	public static CustomTranslationPlugin Instance;
 	private Harmony harmony;
-	private GlobalData globalData;
+	private GlobalData? globalData;
 	public GlobalData? GlobalData
 	{
 		get
