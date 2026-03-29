@@ -164,9 +164,11 @@ public record TranslationEntry(DirectoryInfo location, TranslationFileKind kind)
 
 public class TranslationMetadata
 {
+	[JsonProperty(Required = Required.Always)]
 	[JsonConverter(typeof(LanguageCodeConverter))]
 	public LanguageCode Language { get; set; }
 
+	[JsonProperty(Required = Required.DisallowNull)]
 	[JsonConverter(typeof(LanguageCodeConverter))]
 	public LanguageCode FallbackLanguage { get; set; } = LanguageCode.EN;
 
