@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using GlobalEnums;
 using Newtonsoft.Json;
 using Silksong.ModMenu.Elements;
 using Silksong.ModMenu.Plugin;
@@ -25,6 +27,7 @@ public partial class CustomTranslationPlugin : IModMenuCustomElement
 		openDirectoryBtn.OnSubmit += () =>
 		{
 			Process.Start(translationDir.ToString());
+			logger.LogInfo($"Opened translation directory \"{translationDir.FullName}\"");
 		};
 
 		menu.Add(openDirectoryBtn);
@@ -32,21 +35,32 @@ public partial class CustomTranslationPlugin : IModMenuCustomElement
 		var reloadBtn = new TextButton(Text.Localized("OPTION_RELOAD_TRANSLATION"));
 		reloadBtn.OnSubmit += () =>
 		{
+			logger.LogInfo("Reloading translation");
 			var uiManager = UIManager.instance;
 			if (uiManager == null)
 			{
+				logger.LogError("UI Manager is not found");
 				return;
 			}
 
 			var languageOption = uiManager.transform.Find("UICanvas/GameOptionsMenuScreen/Content/LanguageSetting/LanguageOption");
 			if (languageOption == null)
 			{
+				logger.LogError("LanguageOption is not found");
 				return;
 			}
 
 			if (languageOption.TryGetComponent<MenuLanguageSetting>(out var menuLanguageSetting))
 			{
+				RefreshLanguage();
+				MenuLanguageSetting.UpdateLangsArray();
+				if (!languageReader.ContainsKey(Language._currentLanguage))
+				{
+					Logger.LogWarning($"Unable to load \"{Language._currentLanguage}\". Fallback to EN.");
+					menuLanguageSetting.SetOptionTo(Array.IndexOf(MenuLanguageSetting.langs, SupportedLanguages.EN));
+				}
 				menuLanguageSetting.UpdateLanguageSetting();
+				Logger.LogInfo("Reloaded translation");
 			}
 		};
 
@@ -56,6 +70,7 @@ public partial class CustomTranslationPlugin : IModMenuCustomElement
 		dumpBtn.OnSubmit += () =>
 		{
 			var lang = Language._currentLanguage.ToString();
+			logger.LogInfo($"Exporting: {lang}");
 			var saveDir = new DirectoryInfo(Path.Combine(Path.GetDirectoryName(Info.Location), "export", lang));
 			CreateRecursive(saveDir);
 
@@ -87,6 +102,7 @@ public partial class CustomTranslationPlugin : IModMenuCustomElement
 				["Language"] = lang,
 			});
 
+			logger.LogInfo($"Exported \"{lang}\"");
 			Process.Start(saveDir.Parent.FullName);
 		};
 

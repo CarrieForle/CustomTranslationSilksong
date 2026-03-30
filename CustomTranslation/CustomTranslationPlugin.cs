@@ -72,36 +72,7 @@ public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<G
 
 		}
 
-		var entries = GetTranslationEntries();
-
-		foreach (var entry in entries)
-		{
-			try
-			{
-				var metadata = TranslationMetadata.ReadFrom(entry);
-				var translation = new Translation(metadata, entry);
-
-				if (languageReader.TryGetValue(metadata.Language, out var duplicated))
-				{
-					logger.LogWarning($"Found duplicate entries for '{metadata.Language}' ('{duplicated.entry.Name}' and '{entry.Name}'). Use '{entry.Name}'.");
-				}
-
-				languageReader[metadata.Language] = translation;
-			}
-			catch (Exception e)
-			{
-				logger.LogWarning($"Failed to load entry at '{entry.Name}': {e.Message}");
-			}
-		}
-
-		if (entries.Count == 0)
-		{
-			Logger.LogInfo("No entry loaded.");
-		}
-		else
-		{
-			Logger.LogInfo($"Found {entries.Count} entries. Loaded {languageReader.Count} entries: {string.Join(", ", languageReader.LanguageList)}");
-		}
+		RefreshLanguage();
 	}
 
 	private void Start()
@@ -126,7 +97,7 @@ public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<G
 		}
 	}
 
-	private IList<TranslationEntry> GetTranslationEntries()
+	private static IList<TranslationEntry> GetTranslationEntries()
 	{
 		List<TranslationEntry> res = [];
 		var dirs = translationDir.GetDirectories();
@@ -152,6 +123,41 @@ public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<G
 		}
 
 		return res;
+	}
+
+	public static void RefreshLanguage()
+	{
+		var entries = GetTranslationEntries();
+		languageReader = new ();
+
+		foreach (var entry in entries)
+		{
+			try
+			{
+				var metadata = TranslationMetadata.ReadFrom(entry);
+				var translation = new Translation(metadata, entry);
+
+				if (languageReader.TryGetValue(metadata.Language, out var duplicated))
+				{
+					logger.LogWarning($"Found duplicate entries for '{metadata.Language}' ('{duplicated.entry.Name}' and '{entry.Name}'). Use '{entry.Name}'.");
+				}
+
+				languageReader[metadata.Language] = translation;
+			}
+			catch (Exception e)
+			{
+				logger.LogWarning($"Failed to load entry at '{entry.Name}': {e.Message}");
+			}
+		}
+
+		if (entries.Count == 0)
+		{
+			logger.LogInfo("No entry loaded.");
+		}
+		else
+		{
+			logger.LogInfo($"Found {entries.Count} entries. Loaded {languageReader.Count} entries: {string.Join(", ", languageReader.LanguageList)}");
+		}
 	}
 }
 
@@ -204,6 +210,7 @@ public class Translation(TranslationMetadata metadata, TranslationEntry entry)
 
 	public bool UpdateSheet()
 	{
+		string sheet = "";
 		try
 		{
 			if (entry.kind == TranslationFileKind.Single)
@@ -215,8 +222,9 @@ public class Translation(TranslationMetadata metadata, TranslationEntry entry)
 					throw new CustomTranslationException("JSON is null");
 				}
 
-				foreach (string sheet in Language.Settings.sheetTitles)
+				foreach (string sheet_ in Language.Settings.sheetTitles)
 				{
+					sheet = sheet_;
 					if (!Language._currentEntrySheets.TryGetValue(sheet, out var sheetDict))
 					{
 						sheetDict = [];
@@ -234,8 +242,9 @@ public class Translation(TranslationMetadata metadata, TranslationEntry entry)
 			else
 			{
 				var files = entry.location.GetFiles();
-				foreach (string sheet in Language.Settings.sheetTitles)
+				foreach (string sheet_ in Language.Settings.sheetTitles)
 				{
+					sheet = sheet_;
 					if (!Language._currentEntrySheets.TryGetValue(sheet, out var sheetDict))
 					{
 						sheetDict = [];
@@ -275,7 +284,7 @@ public class Translation(TranslationMetadata metadata, TranslationEntry entry)
 		}
 		catch (Exception ex)
 		{
-			logger.LogError($"Error while loading \"{entry.Name}\" entry: {ex.Message}");
+			logger.LogError($"Error while loading \"{entry.Name}\" entry on sheet \"{sheet}\": {ex.Message}");
 			return false;
 		}
 	}
