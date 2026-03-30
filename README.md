@@ -2,7 +2,12 @@
 
 Load custom translation/localization for unsupported (or supported) languages in Silksong.
 
-This mod only modifies in-game texts. It cannot load custom assets (e.g., Localized TC Logo in Simplified Chinese).
+# Limitation
+
+This mod only modify texts in the game. This means:
+
+- It cannot swap localized assets (e.g., Localized TC Logo in Simplified Chinese).
+- It cannot load external fonts. You're out of luck if the vanilla font doens't work with your language.
 
 ## Install
 
@@ -13,7 +18,6 @@ You can also do a manual installation. First [install BepinEx](https://docs.bepi
 You also need to install the dependencies (which are also mods). They can be found on Thunderstore. Just download those mods and extract them under `BepinEx/plugins`.
 
 This is what your folder structure should look like:
-
 
 ```
 .
