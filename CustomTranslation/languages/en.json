@@ -1,4 +1,5 @@
 {
 	"OPTION_OPEN_TRANSLATION_DIRECTORY": "Open translation folder",
-	"OPTION_RELOAD_TRANSLATION": "Reload translation"
+	"OPTION_RELOAD_TRANSLATION": "Reload translation",
+	"OPTION_EXPORT_TRANSLATION": "Export translation"
 }

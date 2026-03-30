@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using BepInEx.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -9,7 +11,7 @@ using TeamCherry.Localization;
 
 namespace CustomTranslation;
 
-public class Text
+public static class Text
 {
 	public static LocalisedString Localized(string key)
 	{
@@ -27,6 +29,48 @@ public class Text
 		using var reader = new JsonTextReader(sr);
 		var serializer = new JsonSerializer();
 		return serializer.Deserialize<T>(reader);
+	}
+
+	public static string EscapeXml(string str)
+	{
+		var escapeCh = new Dictionary<char, string>
+		{
+			['\''] = "&apos;",
+			['"'] = "&quot;",
+			['>'] = "&gt;",
+			['<'] = "&lt;",
+			['&'] = "&amp;",
+		};
+		
+		var sb = new StringBuilder(str);
+		{
+			for (int i = 0; i < sb.Length; i++)
+			{
+				if (escapeCh.TryGetValue(sb[i], out string escapeStr))
+				{
+					sb.Remove(i, 1);
+					sb.Insert(i, escapeStr);
+					i += escapeStr.Length;
+				}
+			}
+		}
+
+		return sb.ToString();
+	}
+}
+
+public static class DirectoryHelper
+{
+	public static void CreateRecursive(DirectoryInfo dir)
+	{
+		if (!dir.Parent.Exists)
+		{
+			CreateRecursive(dir.Parent);
+		}
+		else
+		{
+			dir.Create();
+		}
 	}
 }
 
