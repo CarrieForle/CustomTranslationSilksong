@@ -50,7 +50,7 @@ public static class Text
 				{
 					sb.Remove(i, 1);
 					sb.Insert(i, escapeStr);
-					i += escapeStr.Length;
+					i += escapeStr.Length - 1;
 				}
 			}
 		}
