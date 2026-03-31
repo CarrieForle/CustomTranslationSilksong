@@ -61,17 +61,25 @@ public static class Text
 
 public static class DirectoryHelper
 {
-	public static void CreateRecursive(DirectoryInfo dir)
+	public static DirectoryInfo TryCreateRecursive(DirectoryInfo dirRoot, string dir)
 	{
-		if (!dir.Parent.Exists)
-		{
-			CreateRecursive(dir.Parent);
-		}
-		else
+		return TryCreate(new DirectoryInfo(Path.Combine(dirRoot.FullName, dir)));
+	}
+
+	public static DirectoryInfo TryCreate(DirectoryInfo dir)
+	{
+		dir.Refresh();
+		try
 		{
 			dir.Create();
 		}
-	}
+		catch
+		{
+			
+		}
+
+		return dir;
+		}
 }
 
 public class LanguageCodeConverter : JsonConverter

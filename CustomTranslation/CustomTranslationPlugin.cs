@@ -14,6 +14,7 @@ using TeamCherry.Localization;
 using TeamCherry.SharedUtils;
 using UnityEngine.UI;
 using static CustomTranslation.CustomTranslationPlugin;
+using static CustomTranslation.DirectoryHelper;
 
 namespace CustomTranslation;
 
@@ -41,6 +42,7 @@ public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<G
 	public const string METADATA_FILENAME = "metadata.json";
 	public static LanguageReader languageReader = new();
 	public static DirectoryInfo translationDir;
+	public static DirectoryInfo dir;
 	internal static ManualLogSource logger;
 	public static CustomTranslationPlugin Instance;
 	private Harmony harmony;
@@ -60,17 +62,9 @@ public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<G
 		harmony = new Harmony(Id);
 		harmony.PatchAll(typeof(Patch));
 		logger = Logger;
-		translationDir = new DirectoryInfo(Path.Combine(Path.GetDirectoryName(Info.Location), "translation"));
+		dir = new DirectoryInfo(Path.GetDirectoryName(Info.Location));
+		translationDir = TryCreateRecursive(dir, "translation");
 		Instance = this;
-
-		try
-		{
-			translationDir.Create();
-		}
-		catch (IOException)
-		{
-
-		}
 
 		RefreshLanguage();
 	}
@@ -100,7 +94,7 @@ public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<G
 	private static IList<TranslationEntry> GetTranslationEntries()
 	{
 		List<TranslationEntry> res = [];
-		var dirs = translationDir.GetDirectories();
+		var dirs = TryCreate(translationDir).GetDirectories();
 		string[] validExtensions = [".txt", ".bytes"];
 		foreach (var dir in dirs)
 		{
@@ -462,7 +456,6 @@ class Patch
 			if (index != -1)
 			{
 				__instance.selectedOptionIndex = index;
-				__instance.currentActiveIndex = index;
 			}
 		}
 	}

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using GlobalEnums;
 using Newtonsoft.Json;
 using Silksong.ModMenu.Elements;
 using Silksong.ModMenu.Plugin;
@@ -26,8 +25,33 @@ public partial class CustomTranslationPlugin : IModMenuCustomElement
 		var openDirectoryBtn = new TextButton(Text.Localized("OPTION_OPEN_TRANSLATION_DIRECTORY"));
 		openDirectoryBtn.OnSubmit += () =>
 		{
-			Process.Start(translationDir.ToString());
-			logger.LogInfo($"Opened translation directory \"{translationDir.FullName}\"");
+			bool isOpened = false;
+
+			try
+			{
+				if (languageReader.TryGetValue(Language._currentLanguage, out var translation))
+				{
+					var targetDir = translation.entry.location;
+					Process.Start(targetDir.FullName);
+					isOpened = true;
+					logger.LogInfo($"Opened translation directory \"{targetDir.FullName}\"");
+				}
+				else
+				{
+					isOpened = false;
+				}
+			}
+			catch
+			{
+				isOpened = false;
+			}
+
+			if (!isOpened)
+			{
+				var targetDir = TryCreate(translationDir);
+				Process.Start(targetDir.FullName);
+				logger.LogInfo($"Opened translation directory \"{targetDir.FullName}\"");
+			}
 		};
 
 		menu.Add(openDirectoryBtn);
@@ -53,11 +77,16 @@ public partial class CustomTranslationPlugin : IModMenuCustomElement
 			if (languageOption.TryGetComponent<MenuLanguageSetting>(out var menuLanguageSetting))
 			{
 				RefreshLanguage();
+				Language.LoadAvailableLanguages();
 				MenuLanguageSetting.UpdateLangsArray();
-				if (!languageReader.ContainsKey(Language._currentLanguage))
+				if (languageReader.ContainsKey(Language._currentLanguage))
+				{
+					menuLanguageSetting.SetOptionTo(MenuLanguageSetting.optionList.IndexOf(Language._currentLanguage.ToString()));
+				}
+				else
 				{
 					Logger.LogWarning($"Unable to load \"{Language._currentLanguage}\". Fallback to EN.");
-					menuLanguageSetting.SetOptionTo(Array.IndexOf(MenuLanguageSetting.langs, SupportedLanguages.EN));
+					menuLanguageSetting.SetOptionTo(MenuLanguageSetting.optionList.IndexOf(LanguageCode.EN.ToString()));
 				}
 				menuLanguageSetting.UpdateLanguageSetting();
 				Logger.LogInfo("Reloaded translation");
@@ -71,21 +100,38 @@ public partial class CustomTranslationPlugin : IModMenuCustomElement
 		{
 			var lang = Language._currentLanguage.ToString();
 			logger.LogInfo($"Exporting: {lang}");
-			var saveDir = new DirectoryInfo(Path.Combine(Path.GetDirectoryName(Info.Location), "export", lang));
-			CreateRecursive(saveDir);
+			var saveDir = TryCreateRecursive(dir, $"export/{lang}");
+			var tmpDir = new DirectoryInfo(Path.GetTempPath());
 
-			using var entrySw = new StreamWriter(Path.Combine(saveDir.FullName, "entry.json"));
+			var entryDir = TryCreateRecursive(saveDir, "entry");
+			using var entrySw = new StreamWriter(Path.Combine(entryDir.FullName, ENTRY_FILENAME));
 			using var entryTw = new JsonTextWriter(entrySw);
 			var serializer = JsonSerializer.Create(new JsonSerializerSettings
 			{
 				Formatting = Formatting.Indented
 			});
 
-			serializer.Serialize(entryTw, Language._currentEntrySheets);
+			// i18n has included their sheets, so we exclude it.
+			Dictionary<string, Dictionary<string, string>> vanillaCurrentEntrySheets = [];
 
-			foreach (var (sheetName, sheet) in Language._currentEntrySheets)
+			foreach (string sheet in Language.Settings.sheetTitles)
 			{
-				using var sheetSw = new StreamWriter(Path.Combine(saveDir.FullName, $"{lang}_{sheetName}.txt"));
+				// Sheets not in resources.asset will be empty,
+				// so we exclude them
+				// this includes "Hornet Old" and "Deprecated" in ZH_TW.
+				if (Language._currentEntrySheets.TryGetValue(sheet, out var dict)
+					&& !dict.IsNullOrEmpty())
+				{
+					vanillaCurrentEntrySheets[sheet] = dict;
+				}
+			}
+
+			serializer.Serialize(entryTw, vanillaCurrentEntrySheets);
+
+			var sheetDir = TryCreateRecursive(saveDir, "sheet");
+			foreach (var (sheetName, sheet) in vanillaCurrentEntrySheets)
+			{
+				using var sheetSw = new StreamWriter(Path.Combine(sheetDir.FullName, $"{lang}_{sheetName}.txt"));
 
 				sheetSw.WriteLine("<entries>");
 				foreach (var (key, text) in sheet)
@@ -95,15 +141,21 @@ public partial class CustomTranslationPlugin : IModMenuCustomElement
 				sheetSw.WriteLine("</entries>");
 			}
 
-			using var metadataSw = new StreamWriter(Path.Combine(saveDir.FullName, "metadata.json"));
-			using var metadataTw = new JsonTextWriter(metadataSw);
-			serializer.Serialize(metadataTw, new Dictionary<string, string>
+			var metadataPath = new FileInfo(Path.Combine(tmpDir.FullName, METADATA_FILENAME));
+			using (var metadataSw = new StreamWriter(metadataPath.FullName))
+			using (var metadataTw = new JsonTextWriter(metadataSw))
 			{
-				["Language"] = lang,
-			});
+				serializer.Serialize(metadataTw, new Dictionary<string, string>
+				{
+					["Language"] = lang,
+				});
+			}
+
+			metadataPath.CopyTo(Path.Combine(sheetDir.FullName, metadataPath.Name), true);
+			metadataPath.CopyTo(Path.Combine(entryDir.FullName, metadataPath.Name), true);
 
 			logger.LogInfo($"Exported \"{lang}\"");
-			Process.Start(saveDir.Parent.FullName);
+			Process.Start(saveDir.FullName);
 		};
 
 		menu.Add(dumpBtn);
