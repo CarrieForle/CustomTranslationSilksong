@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using GlobalEnums;
 using Newtonsoft.Json;
 using Silksong.ModMenu.Elements;
 using Silksong.ModMenu.Plugin;
@@ -79,9 +80,10 @@ public partial class CustomTranslationPlugin : IModMenuCustomElement
 				RefreshLanguage();
 				Language.LoadAvailableLanguages();
 				MenuLanguageSetting.UpdateLangsArray();
-				if (languageReader.ContainsKey(Language._currentLanguage))
+				var optionIndex = MenuLanguageSetting.optionList.IndexOf(Language._currentLanguage.ToString());
+				if (optionIndex != -1)
 				{
-					menuLanguageSetting.SetOptionTo(MenuLanguageSetting.optionList.IndexOf(Language._currentLanguage.ToString()));
+					menuLanguageSetting.SetOptionTo(optionIndex);
 				}
 				else
 				{
