@@ -146,7 +146,7 @@ public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<G
 
 		if (entries.Count == 0)
 		{
-			logger.LogInfo("No entry loaded.");
+			logger.LogInfo("No entry found.");
 		}
 		else
 		{
