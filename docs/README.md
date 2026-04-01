@@ -36,7 +36,7 @@ This mod is also capable of loading existing fan-made translation to an extent, 
 
 # Translation quickstart
 
-This section is intended for translator. If you just want to use other people's translation, you can skip this part. 
+This section is intended for translators. If you just want to load translation, you can skip this part. 
 
 Let's translate some texts in Indonesian to see how this is done (You don't actually need know Indonesian).
 
@@ -60,7 +60,7 @@ Create an `entry.json` text file. Copy and paste the following text:
 }
 ```
 
-`entry.json` includes the translated text. When you switch to Indonesian from the game menu, the mod will look at `entry.json`, and load these text into the game.
+`entry.json` includes the translated texts. When you switch to Indonesian from the game menu, the mod will look at `entry.json`, and load these texts into the game.
 
 It's okay If you don't know JSON. All you need to care about is the text in each line after colon `:`, surrounded by quotation marks `"`. These are the actual texts that you should modify/translate.
 
