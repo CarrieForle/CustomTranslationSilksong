@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using GlobalEnums;
 using Newtonsoft.Json;
 using Silksong.ModMenu.Elements;
 using Silksong.ModMenu.Plugin;
@@ -17,12 +16,12 @@ public partial class CustomTranslationPlugin : IModMenuCustomElement
 {
 	public string ModMenuName()
 	{
-		return Name;
+		return "Custom Translation";
 	}
 
 	public SelectableElement BuildCustomElement()
 	{
-		SimpleMenuScreen menu = new(Name);
+		var menu = new SimpleMenuScreen(Text.Localized("NAME"));
 		var openDirectoryBtn = new TextButton(Text.Localized("OPTION_OPEN_TRANSLATION_DIRECTORY"));
 		openDirectoryBtn.OnSubmit += () =>
 		{
@@ -162,7 +161,7 @@ public partial class CustomTranslationPlugin : IModMenuCustomElement
 
 		menu.Add(dumpBtn);
 
-		var menuBtn = new TextButton(Name);
+		var menuBtn = new TextButton(Text.Localized("NAME"));
 		menuBtn.OnSubmit += () =>
 		{
 			MenuScreenNavigation.Show(menu);
