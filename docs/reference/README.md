@@ -4,7 +4,10 @@ In order for the mod to load a translation/language, you need to provide two thi
 - The translation files containing the translation texts. They come in multiple formats, and can be more than one files. An example is [`entry.json`](#entryjson).
 - Metadata that describes the language you're translating as well as configuration. They're written in [`metadata.json`](metadata/README.md).
 
-In all cases, you don't have to prepare these files from the ground up. You can start translating right away by [exporting translation files](#Export) and modifying those.
+> [!NOTE]
+> In all cases, you don't have to prepare these files from the ground up. You can start translating right away by [exporting translation files](#Export) and modifying those.
+
+Additionally, you can prepare font files in case the language is not supported by the original fonts. See [assets](#asset)
 
 # Translation File Format
 
@@ -18,11 +21,11 @@ Here's an example `entry.json` in English:
 
 ```json
 {
-	"MainMenu": {
-		"MAIN_START": "Start Game",
-		"MAIN_OPTIONS": "Options",
-		"MAIN_QUIT": "Quit Game"
-	}
+  "MainMenu": {
+    "MAIN_START": "Start Game",
+    "MAIN_OPTIONS": "Options",
+    "MAIN_QUIT": "Quit Game"
+  }
 }
 ```
 
@@ -64,9 +67,9 @@ For example, the following `entry.json` translate `MAIN_START` to `"Start Game"`
 
 ```json
 {
-    "MainMenu": {
-        "MAIN_START": "\u0022Start Game\u0022"
-    }
+  "MainMenu": {
+    "MAIN_START": "\u0022Start Game\u0022"
+  }
 }
 ```
 
@@ -80,7 +83,6 @@ In Sheet format. Some characters can be escaped alternatively:
 |`<`|`&lt;`|
 |`&`|`&amp;`|
 
-
 # Control Text
 
 If you view exported translation files, you might find a few texts contain something like `<br>` or `<hpage>`, etc. These are special texts that aren't part of the dialogue text, but instead control the behavior of dialogue, and so called Control Text (I made that name up).
@@ -93,6 +95,34 @@ If you view exported translation files, you might find a few texts contain somet
 |`<page=*>`|Start a new dialogue from NPCs with special event (e.g., voice, behavior). `*` is one of`S`,`T`,`M`,`L`. |
 
 You are free to add or remove control texts except `<page=*>` as it does things more than starting a new dialogue, where changing/adding/removing them might cause unintended behaviors.
+
+# Asset
+
+You can include custom assets that will be replaced upon language selection. 
+
+Currently, you can only replace fonts by providing a `text.otf` (or `ttf`) and `title.otf` (or `ttf`) to replace dialogue font and title font. If you only provide one font, both will use the same font.
+
+To place assets, create an `assets` folder in your translation text folder, and put the respective files in:
+
+```
+CarrieForle-CustomTranslation/
+└── translation/
+    └── YourLanguage/
+        ├── ...
+        ├── metadata.json
+        └── assets/
+            └── put your assets here
+```
+
+Once you place a font. You can put the following optional fields in [`metadata.json`](metadata/README.md) to configure:
+
+```json
+{
+	"TextFontScale": 1, // Optional: The scale of text font (e.g., 1.5 means 150% bigger). Default: 1
+	"TitleFontScale": 1, // Optional: The scale of title font. Default: 1
+	"UseFontAsFallBack": true, // Optional: Only use font when the original couldn't render it. 
+}
+```
 
 # Export
 
