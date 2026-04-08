@@ -590,6 +590,8 @@ class Patch
 		{
 			return;
 		}
+		
+		__instance.tmpro.fontSize *= scale;
 
 		if (translation.metadata.UseFontAsFallBack)
 		{
@@ -597,9 +599,9 @@ class Patch
 			{
 				__instance.tmpro.font.fallbackFontAssets = [patchedFontAsset];
 			}
-			else if (__instance.tmpro.font.fallbackFontAssets[0] != patchedFontAsset)
+			else if (__instance.tmpro.font.fallbackFontAssets.Last() != patchedFontAsset)
 			{
-				__instance.tmpro.font.fallbackFontAssets.Insert(0, patchedFontAsset);
+				__instance.tmpro.font.fallbackFontAssets.Add(patchedFontAsset);
 			}
 		}
 		else
@@ -615,14 +617,8 @@ class Patch
 				patchedFontAsset.fallbackFontAssets.Insert(0, __instance.tmpro.font);
 			}
 
-			__instance.tmpro.font = patchedFontAsset;
-
-			Material fallbackMaterial = TMProOld.TMP_MaterialManager.GetFallbackMaterial(__instance.defaultMaterial, __instance.tmpro.fontSharedMaterial);
-			__instance.FallbackMaterialReference = fallbackMaterial;
-			__instance.tmpro.fontSharedMaterial = fallbackMaterial;
+			__instance.SetFont(patchedFontAsset, true);
 		}
-
-		__instance.tmpro.fontSize *= scale;
 	}
 }
 #pragma warning restore HARMONIZE003
