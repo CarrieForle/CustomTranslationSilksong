@@ -18,6 +18,17 @@
           "HarmonyX": "2.7.0"
         }
       },
+      "CustomFontSilksong": {
+        "type": "Direct",
+        "requested": "[0.1.0, )",
+        "resolved": "0.1.0",
+        "contentHash": "EDWkNObLpBup/4/a8fTCLvjqa7vMk5882O0MMDEBrDeKx+uxzp3R0LyohVQ1690toZ/aKxH9zkxsXeminDOcYQ==",
+        "dependencies": {
+          "BepInEx.Core": "5.4.21",
+          "HarmonyX": "2.9.0",
+          "UnityEngine.Modules": "6000.0.50"
+        }
+      },
       "Hamunii.BepInEx.AutoPlugin": {
         "type": "Direct",
         "requested": "[2.1.0, )",

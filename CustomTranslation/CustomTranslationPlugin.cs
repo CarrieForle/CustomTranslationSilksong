@@ -12,6 +12,7 @@ using System.Text.RegularExpressions;
 using System.Xml;
 using TeamCherry.Localization;
 using TeamCherry.SharedUtils;
+using UnityEngine;
 using UnityEngine.UI;
 using static CustomTranslation.CustomTranslationPlugin;
 using static CustomTranslation.DirectoryHelper;
@@ -35,11 +36,13 @@ public enum TranslationFileKind
 [BepInDependency("org.silksong-modding.modmenu")]
 [BepInDependency("org.silksong-modding.datamanager")]
 [BepInDependency("org.silksong-modding.i18n")]
-[BepInAutoPlugin(id: "io.github.carrieforle.customtranslation", name: "Custom Translation")]
+[BepInDependency("io.github.carrieforle.customfont")]
+[BepInAutoPlugin(id: "io.github.carrieforle.customtranslation")]
 public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<GlobalData>
 {
 	public const string ENTRY_FILENAME = "entry.json";
 	public const string METADATA_FILENAME = "metadata.json";
+	public const string ASSET_DIRNAME = "assets";
 	public static LanguageReader languageReader = new();
 	public static DirectoryInfo translationDir;
 	public static DirectoryInfo dir;
@@ -161,7 +164,92 @@ public class GlobalData
 	public LanguageCode Language;
 }
 
-public record TranslationEntry(DirectoryInfo location, TranslationFileKind kind)
+public class Assets(TranslationEntry entry)
+{
+	public TMProOld.TMP_FontAsset? TitleFont;
+	public TMProOld.TMP_FontAsset? TextFont;
+	private readonly TranslationEntry entry = entry;
+	private bool read = false;
+
+	public TMProOld.TMP_FontAsset? GetFont(FontKind kind)
+	{
+		if (!read)
+		{
+			var assetDir = new DirectoryInfo(Path.Combine(entry.location.FullName, ASSET_DIRNAME));
+			if (!assetDir.Exists)
+			{
+				read = true;
+				return null;
+			}
+
+			FileInfo? firstFontFile = null;
+
+			try
+			{
+				foreach (var file in assetDir.GetFiles())
+				{
+					try
+					{
+						if (TitleFont == null &&
+							(file.Name == "title.ttf" ||
+							file.Name == "title.otf")
+						)
+						{
+							TitleFont = Text.CreateFontFrom(file);
+							firstFontFile = file;
+							logger.LogInfo($"Loaded title font");
+						}
+						else if (TextFont == null &&
+							(file.Name == "text.ttf" ||
+							file.Name == "text.otf")
+						)
+						{
+							TextFont = Text.CreateFontFrom(file);
+							firstFontFile = file;
+							logger.LogInfo($"Loaded text font");
+						}
+					}
+					catch (Exception ex)
+					{
+						logger.LogWarning($"Error while loading \"{file.FullName}\": {ex.Message}\nThis asset will be skipped.");
+					}
+				}
+
+				if (TitleFont == null && TextFont != null && firstFontFile is not null)
+				{
+					TitleFont = Text.CreateFontFrom(firstFontFile);
+				}
+				else if (TitleFont != null && TextFont == null && firstFontFile is not null)
+				{
+					TextFont = Text.CreateFontFrom(firstFontFile);
+				}
+			}
+			catch (Exception ex)
+			{
+				logger.LogError($"Error while discovering assets: {ex.Message}");
+			}
+			finally
+			{
+				read = true;
+			}
+		}
+
+		return kind switch
+		{
+			FontKind.Title => TitleFont,
+			FontKind.Text => TextFont,
+			_ => null
+		};
+	}
+
+	public enum FontKind
+	{
+		Title,
+		Text,
+	}
+}
+
+public class TranslationEntry(DirectoryInfo location, TranslationFileKind kind)
 {
 	public DirectoryInfo location = location;
 	public TranslationFileKind kind = kind;
@@ -177,6 +265,12 @@ public class TranslationMetadata
 	[JsonProperty(Required = Required.DisallowNull)]
 	[JsonConverter(typeof(LanguageCodeConverter))]
 	public LanguageCode FallbackLanguage { get; set; } = LanguageCode.EN;
+
+	[JsonProperty(Required = Required.DisallowNull)]
+	public float TextFontScale { get; set; } = 1;
+
+	[JsonProperty(Required = Required.DisallowNull)]
+	public float TitleFontScale { get; set; } = 1;
 
 	[JsonConstructor]
 	public TranslationMetadata(LanguageCode language)
@@ -201,6 +295,7 @@ public class Translation(TranslationMetadata metadata, TranslationEntry entry)
 {
 	public readonly TranslationMetadata metadata = metadata;
 	public readonly TranslationEntry entry = entry;
+	public readonly Assets assets = new Assets(entry);
 
 	public bool UpdateSheet()
 	{
@@ -307,7 +402,6 @@ public class LanguageReader
 	}
 }
 
-#pragma warning disable HARMONIZE003
 class EnumComparer<T> : Comparer<T>
 where T : Enum
 {
@@ -317,6 +411,7 @@ where T : Enum
 	}
 }
 
+#pragma warning disable HARMONIZE003
 class LanguagePatch
 {
 	[HarmonyPrefix]
@@ -359,7 +454,9 @@ class LanguagePatch
 		}
 
 		Language._currentLanguage = newLang;
+#pragma warning disable CS0618 // copied from original do switch
 		LocalizedAsset[] array = (LocalizedAsset[])UnityEngine.Object.FindObjectsOfType(typeof(LocalizedAsset));
+#pragma warning restore CS0618
 		for (int i = 0; i < array.Length; i++)
 		{
 			array[i].LocalizeAsset();
@@ -403,7 +500,8 @@ class LanguagePatch
 
 class Patch
 {
-	static string[]? originalOptionList;
+	private static string[]? originalOptionList;
+	private static readonly string[] titleFontNames = ["trajan_bold_tmpro", "TrajanPro-Bold SDF"];
 
 	[HarmonyPostfix]
 	[HarmonyPatch(typeof(MenuLanguageSetting), nameof(MenuLanguageSetting.UpdateLangsArray))]
@@ -458,6 +556,53 @@ class Patch
 				__instance.selectedOptionIndex = index;
 			}
 		}
+	}
+
+	[HarmonyPostfix]
+	[HarmonyPatch(typeof(ChangeFontByLanguage), nameof(ChangeFontByLanguage.SetFont), [])]
+	static void PatchFont(ChangeFontByLanguage __instance)
+	{
+		if (!languageReader.TryGetValue(Language._currentLanguage, out var translation))
+		{
+			return;
+		}
+
+		var textFontAsset = translation.assets.GetFont(Assets.FontKind.Text);
+		var titleFontAsset = translation.assets.GetFont(Assets.FontKind.Title);
+		TMProOld.TMP_FontAsset? patchedFontAsset = null;
+		float scale = 1;
+
+		if (__instance.defaultFont.name == "perpetua_tmpro")
+		{
+			patchedFontAsset = textFontAsset;
+			scale = translation.metadata.TextFontScale;
+		}
+		else if (titleFontNames.Any(name => name == __instance.defaultFont.name))
+		{
+			patchedFontAsset = titleFontAsset;
+			scale = translation.metadata.TitleFontScale;
+		}
+
+		if (patchedFontAsset == null)
+		{
+			return;
+		}
+
+		patchedFontAsset.fallbackFontAssets = __instance.tmpro.font.fallbackFontAssets;
+		if (patchedFontAsset.fallbackFontAssets.IsNullOrEmpty())
+		{
+			patchedFontAsset.fallbackFontAssets = [__instance.tmpro.font];
+		}
+		else if (patchedFontAsset.fallbackFontAssets[0] != __instance.tmpro.font)
+		{
+			patchedFontAsset.fallbackFontAssets.Insert(0, __instance.tmpro.font);
+		}
+
+		__instance.tmpro.fontSize *= scale;
+		__instance.tmpro.font = patchedFontAsset;
+		Material fallbackMaterial = TMProOld.TMP_MaterialManager.GetFallbackMaterial(__instance.defaultMaterial, __instance.tmpro.fontSharedMaterial);
+		__instance.FallbackMaterialReference = fallbackMaterial;
+		__instance.tmpro.fontSharedMaterial = fallbackMaterial;
 	}
 }
 #pragma warning restore HARMONIZE003

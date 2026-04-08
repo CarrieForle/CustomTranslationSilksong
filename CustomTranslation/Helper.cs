@@ -5,9 +5,11 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using BepInEx.Logging;
+using CustomFont;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using TeamCherry.Localization;
+using UnityEngine;
 
 namespace CustomTranslation;
 
@@ -41,7 +43,7 @@ public static class Text
 			['<'] = "&lt;",
 			['&'] = "&amp;",
 		};
-		
+
 		var sb = new StringBuilder(str);
 		{
 			for (int i = 0; i < sb.Length; i++)
@@ -56,6 +58,15 @@ public static class Text
 		}
 
 		return sb.ToString();
+	}
+	
+	public static TMProOld.TMP_FontAsset CreateFontFrom(FileInfo file)
+	{
+		return new FontAssetBuilder(new Font(file.FullName))
+		{
+			AtlasWidth = 4096,
+			AtlasHeight = 4096,
+		}.Create();
 	}
 }
 
@@ -79,7 +90,7 @@ public static class DirectoryHelper
 		}
 
 		return dir;
-		}
+	}
 }
 
 public class LanguageCodeConverter : JsonConverter
