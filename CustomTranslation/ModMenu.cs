@@ -60,19 +60,7 @@ public partial class CustomTranslationPlugin : IModMenuCustomElement
 		reloadBtn.OnSubmit += () =>
 		{
 			logger.LogInfo("Reloading translation");
-			var uiManager = UIManager.instance;
-			if (uiManager == null)
-			{
-				logger.LogError("UI Manager is not found");
-				return;
-			}
-
-			var languageOption = uiManager.transform.Find("UICanvas/GameOptionsMenuScreen/Content/LanguageSetting/LanguageOption");
-			if (languageOption == null)
-			{
-				logger.LogError("LanguageOption is not found");
-				return;
-			}
+			var languageOption = UIManager.instance.transform.Find("UICanvas/GameOptionsMenuScreen/Content/LanguageSetting/LanguageOption");
 
 			if (languageOption.TryGetComponent<MenuLanguageSetting>(out var menuLanguageSetting))
 			{
