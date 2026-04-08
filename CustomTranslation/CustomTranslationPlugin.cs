@@ -4,6 +4,7 @@ using HarmonyLib;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Silksong.DataManager;
+using Silksong.ModMenu;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -33,8 +34,8 @@ public enum TranslationFileKind
 /// Localization codes mostly work with LanguageCode which allows us to work with unsupported language. SupportedLangauges work with saved option and UI.
 /// 
 /// </summary>
-[BepInDependency("org.silksong-modding.modmenu")]
-[BepInDependency("org.silksong-modding.datamanager")]
+[BepInDependency(ModMenuPlugin.Id)]
+[BepInDependency(DataManagerPlugin.Id)]
 [BepInDependency("org.silksong-modding.i18n")]
 [BepInDependency("io.github.carrieforle.customfont")]
 [BepInAutoPlugin(id: "io.github.carrieforle.customtranslation")]
