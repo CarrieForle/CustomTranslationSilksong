@@ -7,6 +7,7 @@ using Silksong.ModMenu.Elements;
 using Silksong.ModMenu.Plugin;
 using Silksong.ModMenu.Screens;
 using TeamCherry.Localization;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using static CustomTranslation.DirectoryHelper;
 
@@ -56,7 +57,10 @@ public partial class CustomTranslationPlugin : IModMenuCustomElement
 
 		menu.Add(openDirectoryBtn);
 
-		var reloadBtn = new TextButton(Text.Localized("OPTION_RELOAD_TRANSLATION"));
+		var reloadBtn = new TextButton(
+			Text.Localized("OPTION_RELOAD_TRANSLATION"),
+			Text.Localized("OPTION_DESCRIPTION_RELOAD_TRANSLATION")
+		);
 		reloadBtn.OnSubmit += () =>
 		{
 			logger.LogInfo("Reloading translation");
@@ -78,6 +82,12 @@ public partial class CustomTranslationPlugin : IModMenuCustomElement
 					menuLanguageSetting.SetOptionTo(MenuLanguageSetting.optionList.IndexOf(LanguageCode.EN.ToString()));
 				}
 				menuLanguageSetting.UpdateLanguageSetting();
+
+				foreach (var cfbl in FindObjectsByType<ChangeFontByLanguage>(UnityEngine.FindObjectsSortMode.None))
+				{
+					cfbl.SetFont();
+				}
+
 				Logger.LogInfo("Reloaded translation");
 			}
 		};
