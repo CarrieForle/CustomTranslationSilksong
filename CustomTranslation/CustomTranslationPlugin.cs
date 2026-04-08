@@ -13,7 +13,6 @@ using System.Text.RegularExpressions;
 using System.Xml;
 using TeamCherry.Localization;
 using TeamCherry.SharedUtils;
-using UnityEngine;
 using UnityEngine.UI;
 using static CustomTranslation.CustomTranslationPlugin;
 using static CustomTranslation.DirectoryHelper;
@@ -590,7 +589,7 @@ class Patch
 		{
 			return;
 		}
-		
+
 		__instance.tmpro.fontSize *= scale;
 
 		if (translation.metadata.UseFontAsFallBack)
