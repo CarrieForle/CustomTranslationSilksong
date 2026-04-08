@@ -75,7 +75,7 @@ jobs:
       if: github.event_name == 'push' && steps.needs-release.outputs.exists == 'false'
       with:
         subject-path: |
-          thunderstore/dist/*.zip
+          CustomTranslation/thunderstore/dist/*.zip
           nuget/*.nupkg
 
   # Publish to Thunderstore to that users can install it
@@ -190,7 +190,7 @@ jobs:
         body: |
           Build attested at ${{ needs.build.outputs.attestation-url }}
         files: |
-          CustomTranslation/thunderstore/dist/*.zip
+          thunderstore/dist/*.zip
 
   secret-check:
     runs-on: ubuntu-latest
