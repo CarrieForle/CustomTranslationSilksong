@@ -272,6 +272,9 @@ public class TranslationMetadata
 	[JsonProperty(Required = Required.DisallowNull)]
 	public float TitleFontScale { get; set; } = 1;
 
+	[JsonProperty(Required = Required.DisallowNull)]
+	public bool UseFontAsFallBack { get; set; } = true;
+
 	[JsonConstructor]
 	public TranslationMetadata(LanguageCode language)
 	{
@@ -588,21 +591,38 @@ class Patch
 			return;
 		}
 
-		patchedFontAsset.fallbackFontAssets = __instance.tmpro.font.fallbackFontAssets;
-		if (patchedFontAsset.fallbackFontAssets.IsNullOrEmpty())
+		if (translation.metadata.UseFontAsFallBack)
 		{
-			patchedFontAsset.fallbackFontAssets = [__instance.tmpro.font];
+			if (__instance.tmpro.font.fallbackFontAssets.IsNullOrEmpty())
+			{
+				__instance.tmpro.font.fallbackFontAssets = [patchedFontAsset];
+			}
+			else if (__instance.tmpro.font.fallbackFontAssets[0] != patchedFontAsset)
+			{
+				__instance.tmpro.font.fallbackFontAssets.Insert(0, patchedFontAsset);
+			}
 		}
-		else if (patchedFontAsset.fallbackFontAssets[0] != __instance.tmpro.font)
+		else
 		{
-			patchedFontAsset.fallbackFontAssets.Insert(0, __instance.tmpro.font);
+			patchedFontAsset.fallbackFontAssets = __instance.tmpro.font.fallbackFontAssets;
+
+			if (patchedFontAsset.fallbackFontAssets.IsNullOrEmpty())
+			{
+				patchedFontAsset.fallbackFontAssets = [__instance.tmpro.font];
+			}
+			else if (patchedFontAsset.fallbackFontAssets[0] != __instance.tmpro.font)
+			{
+				patchedFontAsset.fallbackFontAssets.Insert(0, __instance.tmpro.font);
+			}
+
+			__instance.tmpro.font = patchedFontAsset;
+
+			Material fallbackMaterial = TMProOld.TMP_MaterialManager.GetFallbackMaterial(__instance.defaultMaterial, __instance.tmpro.fontSharedMaterial);
+			__instance.FallbackMaterialReference = fallbackMaterial;
+			__instance.tmpro.fontSharedMaterial = fallbackMaterial;
 		}
 
 		__instance.tmpro.fontSize *= scale;
-		__instance.tmpro.font = patchedFontAsset;
-		Material fallbackMaterial = TMProOld.TMP_MaterialManager.GetFallbackMaterial(__instance.defaultMaterial, __instance.tmpro.fontSharedMaterial);
-		__instance.FallbackMaterialReference = fallbackMaterial;
-		__instance.tmpro.fontSharedMaterial = fallbackMaterial;
 	}
 }
 #pragma warning restore HARMONIZE003
