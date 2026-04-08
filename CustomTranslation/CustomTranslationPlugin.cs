@@ -599,7 +599,7 @@ class Patch
 			{
 				__instance.tmpro.font.fallbackFontAssets = [patchedFontAsset];
 			}
-			else if (__instance.tmpro.font.fallbackFontAssets.Last() != patchedFontAsset)
+			else if (!__instance.tmpro.font.fallbackFontAssets.Contains(patchedFontAsset))
 			{
 				__instance.tmpro.font.fallbackFontAssets.Add(patchedFontAsset);
 			}
@@ -612,7 +612,7 @@ class Patch
 			{
 				patchedFontAsset.fallbackFontAssets = [__instance.tmpro.font];
 			}
-			else if (patchedFontAsset.fallbackFontAssets[0] != __instance.tmpro.font)
+			else if (!patchedFontAsset.fallbackFontAssets.Contains(__instance.tmpro.font))
 			{
 				patchedFontAsset.fallbackFontAssets.Insert(0, __instance.tmpro.font);
 			}
