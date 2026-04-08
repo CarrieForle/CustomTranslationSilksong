@@ -7,7 +7,6 @@ using Silksong.ModMenu.Elements;
 using Silksong.ModMenu.Plugin;
 using Silksong.ModMenu.Screens;
 using TeamCherry.Localization;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using static CustomTranslation.DirectoryHelper;
 
@@ -71,6 +70,7 @@ public partial class CustomTranslationPlugin : IModMenuCustomElement
 				RefreshLanguage();
 				Language.LoadAvailableLanguages();
 				MenuLanguageSetting.UpdateLangsArray();
+
 				var optionIndex = MenuLanguageSetting.optionList.IndexOf(Language._currentLanguage.ToString());
 				if (optionIndex != -1)
 				{
@@ -81,6 +81,7 @@ public partial class CustomTranslationPlugin : IModMenuCustomElement
 					Logger.LogWarning($"Unable to load \"{Language._currentLanguage}\". Fallback to EN.");
 					menuLanguageSetting.SetOptionTo(MenuLanguageSetting.optionList.IndexOf(LanguageCode.EN.ToString()));
 				}
+
 				menuLanguageSetting.UpdateLanguageSetting();
 
 				foreach (var cfbl in FindObjectsByType<ChangeFontByLanguage>(UnityEngine.FindObjectsSortMode.None))

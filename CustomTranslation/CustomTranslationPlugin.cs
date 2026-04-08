@@ -32,7 +32,6 @@ public enum TranslationFileKind
 /// - SupportedLanguages (subset of LanguageCode, contain officially supported languages)
 /// 
 /// Localization codes mostly work with LanguageCode which allows us to work with unsupported language. SupportedLangauges work with saved option and UI.
-/// 
 /// </summary>
 [BepInDependency(ModMenuPlugin.Id)]
 [BepInDependency(DataManagerPlugin.Id)]
@@ -126,7 +125,7 @@ public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<G
 	public static void RefreshLanguage()
 	{
 		var entries = GetTranslationEntries();
-		languageReader = new ();
+		languageReader = new();
 
 		foreach (var entry in entries)
 		{
@@ -535,7 +534,7 @@ class Patch
 		}
 
 		Language.SwitchLanguage(lang);
-		// __instance.gm is not initialized until the language menu is opened once, but this might be called from modmenu before it happened.
+		// Original method uses __instance.gm, which is not initialized until the language menu is opened once, but this might be called from modmenu before it happened.
 		GameManager.instance.RefreshLocalization();
 		__instance.UpdateText();
 
