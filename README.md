@@ -2,7 +2,7 @@
 
 Load custom translation/localization for unsupported (or supported) languages in Silksong.
 
-It also supports [I18N](https://thunderstore.io/c/hollow-knight-silksong/p/silksong_modding/I18N/), allowing you to translate mods in unsupported languages. See [here](docs/README.md#I18N) for more details.
+It also supports [I18N](https://thunderstore.io/c/hollow-knight-silksong/p/silksong_modding/I18N/), allowing you to translate mods in unsupported languages.
 
 # Limitation
 
