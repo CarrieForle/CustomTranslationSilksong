@@ -36,7 +36,7 @@ This mod is also capable of loading existing fan-made translation to an extent, 
 
 # I18N
 
-This mod supports [I18N](https://thunderstore.io/c/hollow-knight-silksong/p/silksong_modding/I18N/) and allow you to translate/load translation in other unsupported languages by including the translation file named with lowercase language code.
+This mod is compatible with [I18N](https://thunderstore.io/c/hollow-knight-silksong/p/silksong_modding/I18N/) and allow you to translate/load translation in unsupported languages for mods by including the translation file named with lowercase language code.
 
 For example, if you want to translate a mod into Thai, you would provide `th.json` under its `languages` folder.
 
