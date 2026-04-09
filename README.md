@@ -35,7 +35,7 @@ This is what your folder structure should look like:
 
 ## Usage
 
-See [here](docs/README.md).
+See [here](https://github.com/CarrieForle/CustomTranslationSilksong/tree/main/docs).
 
 ## Build
 
