@@ -22,7 +22,7 @@
     <PackageIcon>icon.png</PackageIcon>
     <RepositoryUrl>https://github.com/CarrieForle/CustomTranslationSilksong</RepositoryUrl>
     <NeutralLanguage>EN</NeutralLanguage>
-    <Version>0.1.1</Version>
+    <Version>0.1.2</Version>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="BepInEx.Analyzers" Version="1.0.8" PrivateAssets="all" />
