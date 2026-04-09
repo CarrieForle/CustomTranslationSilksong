@@ -17,6 +17,11 @@ on:
         required: true
         default: false
         type: boolean
+      force_nexus:
+        description: Force re-publishing to Nexus
+        required: true
+        default: false
+        type: boolean
     
 permissions:
   contents: write
@@ -34,6 +39,7 @@ jobs:
       is-new-version: ${{ !fromJSON(steps.needs-release.outputs.exists || 'true') }}
       thunderstore-artifact-id: ${{ steps.thunderstore-artifact.outputs.artifact-id }}
       nuget-artifact-id: ${{ steps.nuget-artifact.outputs.artifact-id }}
+      nexus-artifact-id: ${{ steps.nexus-artifact.outputs.artifact-id }}
 
     steps:
     - uses: actions/checkout@v6
@@ -57,6 +63,15 @@ jobs:
       with:
         path: CustomTranslation/thunderstore/dist/*.zip
         archive: false
+    - name: Upload nexus artifact
+      id: nexus-artifact
+      uses: actions/upload-artifact@v7
+      with:
+        name: CarrieForle-CustomTranslation.zip
+        path: |
+          CustomTranslation/bin/Release/netstandard2.1/*.dll
+          CustomTranslation/bin/Release/netstandard2.1/*.pdb
+        archive: true
     - name: Upload nuget artifact
       id: nuget-artifact
       uses: actions/upload-artifact@v7
@@ -164,6 +179,40 @@ jobs:
         dotnet nuget push nuget/*.nupkg \
           --api-key $NUGET_API_KEY \
           --source https://api.nuget.org/v3/index.json
+          
+  release-nexus:
+    runs-on: ubuntu-latest
+    needs:
+      - build
+      - secret-check
+    if: |
+      needs.secret-check.outputs.has-nexus-secret == 'true' && 
+      (
+        (
+          github.event_name == 'push' && 
+          needs.build.outputs.allow-release == 'true' && 
+          needs.build.outputs.is-new-version == 'true'
+        ) ||
+        (
+          github.event_name == 'workflow_dispatch' &&
+          github.event.inputs.force_nexus == 'true'
+        )
+      )
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v8
+      with:
+        artifact-ids: ${{ needs.build.outputs.nexus-artifact-id }}
+        path: .
+        skip-decompress: true
+    - name: Upload to NexusMods
+      uses: Nexus-Mods/upload-action@v1.0.0-beta.3
+      with:
+        api_key: ${{ secrets.NEXUSMODS_API_KEY }}
+        file_group_id: ${{ secrets.NEXUSMODS_GROUP }}
+        filename: CarrieForle-CustomTranslation.zip
+        version: ${{ needs.build.outputs.version }}
+        file_category: main
 
   # Publish to GitHub releases to keep release history on the repository (needed for this workflow to work properly
   # but is also nice for multiple other reasons such as auto-tagging *after* a build success)
@@ -172,13 +221,11 @@ jobs:
       - build
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && needs.build.outputs.allow-release == 'true' && needs.build.outputs.is-new-version == 'true'
-
     steps:
     - name: Download artifact
       uses: actions/download-artifact@v8
       with:
-        artifact-ids: ${{ needs.build.outputs.thunderstore-artifact-id }}
-        path: thunderstore/dist
+        artifact-ids: ${{ needs.build.outputs.nexus-artifact-id }}
         skip-decompress: true
     - name: Release
       uses: softprops/action-gh-release@v2
@@ -190,12 +237,13 @@ jobs:
         body: |
           Build attested at ${{ needs.build.outputs.attestation-url }}
         files: |
-          thunderstore/dist/*.zip
+          *.zip
 
   secret-check:
     runs-on: ubuntu-latest
     outputs:
       has-nuget-secret: ${{ secrets.NUGET_API_KEY != '' }}
       has-thunderstore-secret: ${{ secrets.THUNDERSTORE_API_KEY != '' }}
+      has-nexus-secret: ${{ secrets.NEXUSMODS_API_KEY != '' }}
     steps:
       - run: echo no-op
