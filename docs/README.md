@@ -6,7 +6,7 @@ First run Silksong once to generate necessary files. You can immediately close i
 
 Go to the mod installation folder. This is either a profile folder if you use a mod manager, or Silksong installation folder for manual installation (`<Silksong or profile folder>/BepinEx/plugins/CarrieForle-CustomTranslation`).
 
-Here you should see a folder called `translation`. This is where you put all the translation files. You would download other people's work of translation zip files and unzip them to here.
+Here you should see a folder called `translation`. This is where you put all the translation files.
 
 For example:
 
@@ -32,7 +32,7 @@ Here, the mod will load 3 languages: Indonesian (ID), Dutch (NL), and Turkish (T
 > [!NOTE]
 > This mod contains another folder called `languages`. This is for the translation **just for this mod**, not related to vanilla game text.
 
-This mod is also capable of loading existing fan-made translation to an extent, so that you don't have to replace game files and can easily manage it with this mod. [See here for more details](guide/load-fan-made-translation-without-exporting/README.md).
+To load existing translation that requires replacing `resources.assets`, [see here for more details](guide/load-fan-made-translation-without-exporting/README.md).
 
 # I18N
 

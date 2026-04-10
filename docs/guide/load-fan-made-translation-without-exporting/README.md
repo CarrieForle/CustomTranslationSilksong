@@ -33,7 +33,7 @@ Go back and go to Mods > Custom Translation > Export current language.
 
 A folder containing the export files will appear. Copy `entry` folder into `translation` folder in the mod installation folder. Rename it to `UK`.
 
-Under `UK` in `translation`, open `metadata.json`. Replace `"Language": "EN"` with `"Language": "UK"`.
+Under `UK` in `translation`, open `metadata.json`. Replace `"Language": "PT"` with `"Language": "UK"`.
 
 Save and close. Go back to Silksong and hit 'Reload translation'.
 
@@ -45,14 +45,14 @@ Once you confirm it works, you can close the game and replace the game files wit
 
 Silksong can't render some Ukrainian letter, so we need to provide a font. Any Ukrainian font would do. In this example we will use [Lora](https://fonts.google.com/specimen/Lora?lang=uk_Cyrl&preview.lang=uk_Cyrl).
 
-Before you download the font. Create a folder named `assets` under `UK`.
+Before you download the font, create a folder named `assets` under `UK`.
 
-Download the font and unzip it. It should contain `Lora-VariableFont_wght.ttf`. Copy that file to `assets` folder in the mod installation folder and rename it to `text.ttf`.
+Download the font and unzip it.  Copy `Lora-VariableFont_wght.ttf` into `assets` folder and rename it to `text.ttf`.
 
 Start Silksong and you should see the font changed (assuming you selected Ukrainian before you closed the game).
 
 > [!NOTE]
-> Silksong uses two fonts throughout the game and you can replace both with different fonts. See [asset]().
+> Silksong uses two fonts throughout the game and you can replace both with different fonts. See [asset](../../reference#asset).
 
 ## Example: Indonesian
 
@@ -82,7 +82,7 @@ Create `metadata.json` and write following text:
 }
 ```
 
-Close and save. Start Silksong and see there is Indonesian.
+Save and close `metadata.json`. Start Silksong and see if there is Indonesian.
 
 If it works. It's great! ...However you could not edit the translation text because they're encrypted. You need to decrypt it to edit those text.
 
@@ -93,5 +93,4 @@ The easiest way to decrypt it is export the current language from the game. In S
 A folder will be opened containing the exported files which are decrypted. Copy `entry` folder into `translation` folder in the mod installation folder. Remove `ID` folder and rename `entry` folder to `ID`. Go back to the game and hit 'Reload translation' to see if it works.
 
 > [!NOTE]
-If for some reason you can't decrypt the files within the game,
-[this tool by zhoppers](https://www.nexusmods.com/hollowknightsilksong/mods/10) can do it. I also made [a tool](https://github.com/CarrieForle/DecryptTextAssetSilksong) for this purpose.
+> If for some reason you can't decrypt the files within the game, [this tool by zhoppers](https://www.nexusmods.com/hollowknightsilksong/mods/10) can do it. I also made [a tool](https://github.com/CarrieForle/DecryptTextAssetSilksong) for this purpose.
