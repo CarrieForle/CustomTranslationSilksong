@@ -59,9 +59,9 @@ You don't need to understand XML to start translating. All you  should care abou
 
 ## Escape characters
 
-[Escaping character](https://en.wikipedia.org/wiki/Escape_character) is needed when putting the character as-is makes the file an invalid format, such as double quotation mark `"` (`\u0022`) in `entry.json`.
+You can write Unicode direcly without [escaping character](https://en.wikipedia.org/wiki/Escape_character). Escaping is only needed when putting the character as-is makes the file invalid, such as double quotation mark `"` (`\u0022`) in `entry.json`. Let me know if there are other scenarios that requires escaping!
 
-To escape characters, you write Unicode code points as `\uXXXX`. In every case however, you can just put Unicode characters directly, no need to escape. 
+To escape characters, you write Unicode code points as `\uXXXX`.
 
 For example, the following `entry.json` translate `MAIN_START` to `"Start Game"` (with quotation marks!):
 

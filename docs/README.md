@@ -6,7 +6,7 @@ First run Silksong once to generate necessary files. You can immediately close i
 
 Go to the mod installation folder. This is either a profile folder if you use a mod manager, or Silksong installation folder for manual installation (`<Silksong or profile folder>/BepinEx/plugins/CarrieForle-CustomTranslation`).
 
-Here you should see a folder called `translation`. This is where you put all the translation files. You would download other people's work of translation zip files and unzip them to here.
+Here you should see a folder called `translation`. This is where you put all the translation files.
 
 For example:
 
@@ -32,11 +32,11 @@ Here, the mod will load 3 languages: Indonesian (ID), Dutch (NL), and Turkish (T
 > [!NOTE]
 > This mod contains another folder called `languages`. This is for the translation **just for this mod**, not related to vanilla game text.
 
-This mod is also capable of loading existing fan-made translation to an extent, so that you don't have to replace game files and can easily manage it with this mod. [See here for more details](guide/load-fan-made-translation-without-exporting/README.md).
+To load existing translation that requires replacing `resources.assets`, [see here for more details](guide/load-fan-made-translation-without-exporting/README.md).
 
 # I18N
 
-This mod is compatible with [I18N](https://thunderstore.io/c/hollow-knight-silksong/p/silksong_modding/I18N/) and allow you to translate/load translation in unsupported languages for mods by including the translation file named with lowercase language code.
+This mod is compatible with [I18N](https://thunderstore.io/c/hollow-knight-silksong/p/silksong_modding/I18N/) and allows you to translate/load translation in unsupported languages for mods by including the translation file named with lowercase language code.
 
 For example, if you want to translate a mod into Thai, you would provide `th.json` under its `languages` folder.
 
@@ -46,14 +46,14 @@ For example, if you want to translate a mod into Thai, you would provide `th.jso
 
 This section is intended for translators. If you just want to load translation, you can skip this part. 
 
-Let's translate some texts in Indonesian to see how this is done (You don't actually need know Indonesian).
+Let's translate some texts in Indonesian to see how this is done (You don't actually need to know Indonesian).
 
 First, go into `translation` folder and create a new subfolder named `ID`. 
 
 > [!NOTE]
 > This subfolder can be named anything, but it's good to use the language as the name to separate other translation files.
 
-Create an `entry.json` text file. Copy and paste the following text:
+Create an `entry.json` text file under `ID` folder. Copy and paste the following text:
 
 ```json
 {
@@ -99,7 +99,7 @@ Next, create a `metadata.json` text file. Copy and paste the following text:
 }
 ```
 
-`metadata.json` tells the mod which language of this translation is, and `ID` tells the mod that it is Indonesian. To translate into other languages, put the appropriate language code in place of `ID`. 
+`metadata.json` tells the mod which language of this translation is, and `ID` means Indonesian. To translate into other languages, put the appropriate language code in place of `ID`. 
 
 > [!NOTE]
 > [The complete list of language codes](https://github.com/SFGrenade/LanguageSupport-Repo#table-of-available-language-codes)
