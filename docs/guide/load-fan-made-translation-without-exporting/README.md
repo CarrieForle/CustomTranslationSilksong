@@ -33,7 +33,7 @@ Go back and go to Mods > Custom Translation > Export current language.
 
 A folder containing the export files will appear. Copy `entry` folder into `translation` folder in the mod installation folder. Rename it to `UK`.
 
-Under `UK` in `translation`, open `metadata.json`. Replace `"Language": "EN"` with `"Language": "UK"`.
+Under `UK` in `translation`, open `metadata.json`. Replace `"Language": "PT"` with `"Language": "UK"`.
 
 Save and close. Go back to Silksong and hit 'Reload translation'.
 
@@ -52,7 +52,7 @@ Download the font and unzip it. It should contain `Lora-VariableFont_wght.ttf`. 
 Start Silksong and you should see the font changed (assuming you selected Ukrainian before you closed the game).
 
 > [!NOTE]
-> Silksong uses two fonts throughout the game and you can replace both with different fonts. See [asset]().
+> Silksong uses two fonts throughout the game and you can replace both with different fonts. See [asset](../../reference#asset).
 
 ## Example: Indonesian
 
