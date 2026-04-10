@@ -68,9 +68,7 @@ jobs:
       uses: actions/upload-artifact@v7
       with:
         name: CarrieForle-CustomTranslation.zip
-        path: |
-          CustomTranslation/bin/Release/netstandard2.1/*.dll
-          CustomTranslation/bin/Release/netstandard2.1/*.pdb
+        path: CustomTranslation/thunderstore/temp/*
         archive: true
     - name: Upload nuget artifact
       id: nuget-artifact
@@ -181,10 +179,12 @@ jobs:
           --source https://api.nuget.org/v3/index.json
           
   release-nexus:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     needs:
       - build
       - secret-check
+    env: 
+      BUILD_DIR: myMod
     if: |
       needs.secret-check.outputs.has-nexus-secret == 'true' && 
       (
@@ -199,11 +199,15 @@ jobs:
         )
       )
     steps:
+    # This has to be first because it cleans current directory
+    - uses: actions/checkout@v6
+      with:
+        sparse-checkout: package-nexus.ps1
+        sparse-checkout-cone-mode: false
     - name: Download artifact
       uses: actions/download-artifact@v8
       with:
         artifact-ids: ${{ needs.build.outputs.nexus-artifact-id }}
-        path: .
         skip-decompress: true
     - name: Upload to NexusMods
       uses: Nexus-Mods/upload-action@v1.0.0-beta.3
@@ -211,6 +215,20 @@ jobs:
         api_key: ${{ secrets.NEXUSMODS_API_KEY }}
         file_group_id: ${{ secrets.NEXUSMODS_GROUP }}
         filename: CarrieForle-CustomTranslation.zip
+        display_name: CustomTranslation
+        description: Includes just this mod. You need to install dependencies manually.
+        version: ${{ needs.build.outputs.version }}
+        file_category: main
+    - run: 7z x *.zip -o${{ env.BUILD_DIR }}
+    - run: .\package-nexus.ps1
+    - name: Upload to NexusMods (all in one)
+      uses: Nexus-Mods/upload-action@v1.0.0-beta.3
+      with:
+        api_key: ${{ secrets.NEXUSMODS_API_KEY }}
+        file_group_id: ${{ secrets.NEXUSMODS_GROUP_ALL_IN_ONE }}
+        filename: bin/nexus/CarrieForle-CustomTranslation.zip
+        display_name: CustomTranslation all in one
+        description: Included this mod and the dependencies. Just unzip and drag and drop into BepinEx folder.
         version: ${{ needs.build.outputs.version }}
         file_category: main
 
