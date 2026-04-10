@@ -1,3 +1,7 @@
+# 0.2.0
+
+Mitigate changes from ModMenu 0.5.0
+
 # 0.1.3
 
 Update README yet again!
