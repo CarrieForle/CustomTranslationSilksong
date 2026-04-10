@@ -12,14 +12,14 @@ using static CustomTranslation.DirectoryHelper;
 
 namespace CustomTranslation;
 
-public partial class CustomTranslationPlugin : IModMenuCustomElement
+public partial class CustomTranslationPlugin : IModMenuCustomMenu
 {
-	public string ModMenuName()
+	public LocalizedText ModMenuName()
 	{
-		return "Custom Translation";
+		return Text.Localized("NAME");
 	}
 
-	public SelectableElement BuildCustomElement()
+	public AbstractMenuScreen BuildCustomMenu()
 	{
 		var menu = new SimpleMenuScreen(Text.Localized("NAME"));
 		var openDirectoryBtn = new TextButton(Text.Localized("OPTION_OPEN_TRANSLATION_DIRECTORY"));
@@ -160,12 +160,6 @@ public partial class CustomTranslationPlugin : IModMenuCustomElement
 
 		menu.Add(dumpBtn);
 
-		var menuBtn = new TextButton(Text.Localized("NAME"));
-		menuBtn.OnSubmit += () =>
-		{
-			MenuScreenNavigation.Show(menu);
-		};
-
-		return menuBtn;
+		return menu;
 	}
 }
