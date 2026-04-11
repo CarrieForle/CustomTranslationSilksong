@@ -65,7 +65,7 @@ public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<G
 		harmony.PatchAll(typeof(Patch));
 		logger = Logger;
 		dir = new DirectoryInfo(Path.GetDirectoryName(Info.Location));
-		translationDir = TryCreateRecursive(dir, "translation");
+		translationDir = Create(dir, "translation");
 		Instance = this;
 
 		RefreshLanguage();
@@ -96,7 +96,7 @@ public partial class CustomTranslationPlugin : BaseUnityPlugin, IGlobalDataMod<G
 	private static IList<TranslationEntry> GetTranslationEntries()
 	{
 		List<TranslationEntry> res = [];
-		var dirs = TryCreate(translationDir).GetDirectories();
+		var dirs = Create(translationDir).GetDirectories();
 		string[] validExtensions = [".txt", ".bytes"];
 		foreach (var dir in dirs)
 		{

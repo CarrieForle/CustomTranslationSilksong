@@ -72,24 +72,19 @@ public static class Text
 
 public static class DirectoryHelper
 {
-	public static DirectoryInfo TryCreateRecursive(DirectoryInfo dirRoot, string dir)
+	public static DirectoryInfo Create(DirectoryInfo dirRoot)
 	{
-		return TryCreate(new DirectoryInfo(Path.Combine(dirRoot.FullName, dir)));
+		if (!dirRoot.Exists)
+		{
+			dirRoot.Create();
+		}
+
+		return dirRoot;
 	}
 
-	public static DirectoryInfo TryCreate(DirectoryInfo dir)
+	public static DirectoryInfo Create(DirectoryInfo dirRoot, params string[] dir)
 	{
-		dir.Refresh();
-		try
-		{
-			dir.Create();
-		}
-		catch
-		{
-			
-		}
-
-		return dir;
+		return Directory.CreateDirectory(Path.Combine([dirRoot.FullName, .. dir]));
 	}
 }
 
