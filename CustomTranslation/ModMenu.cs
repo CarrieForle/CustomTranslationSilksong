@@ -48,7 +48,7 @@ public partial class CustomTranslationPlugin : IModMenuCustomMenu
 
 			if (!isOpened)
 			{
-				var targetDir = TryCreate(translationDir);
+				var targetDir = Create(translationDir);
 				Process.Start(targetDir.FullName);
 				logger.LogInfo($"Opened translation directory \"{targetDir.FullName}\"");
 			}
@@ -100,10 +100,10 @@ public partial class CustomTranslationPlugin : IModMenuCustomMenu
 		{
 			var lang = Language._currentLanguage.ToString();
 			logger.LogInfo($"Exporting: {lang}");
-			var saveDir = TryCreateRecursive(dir, $"export/{lang}");
+			var saveDir = Create(dir, "export", lang);
 			var tmpDir = new DirectoryInfo(Path.GetTempPath());
 
-			var entryDir = TryCreateRecursive(saveDir, "entry");
+			var entryDir = Create(saveDir, "entry");
 			using var entrySw = new StreamWriter(Path.Combine(entryDir.FullName, ENTRY_FILENAME));
 			using var entryTw = new JsonTextWriter(entrySw);
 			var serializer = JsonSerializer.Create(new JsonSerializerSettings
@@ -128,7 +128,7 @@ public partial class CustomTranslationPlugin : IModMenuCustomMenu
 
 			serializer.Serialize(entryTw, vanillaCurrentEntrySheets);
 
-			var sheetDir = TryCreateRecursive(saveDir, "sheet");
+			var sheetDir = Create(saveDir, "sheet");
 			foreach (var (sheetName, sheet) in vanillaCurrentEntrySheets)
 			{
 				using var sheetSw = new StreamWriter(Path.Combine(sheetDir.FullName, $"{lang}_{sheetName}.txt"));
