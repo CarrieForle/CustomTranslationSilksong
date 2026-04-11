@@ -2,6 +2,6 @@
 	"NAME": "Custom Translation",
 	"OPTION_OPEN_TRANSLATION_DIRECTORY": "Open translation folder",
 	"OPTION_RELOAD_TRANSLATION": "Reload translation",
-	"OPTION_DESCRIPTION_RELOAD_TRANSLATION": "Reload translation texts and fonts and rediscover new entries.",
+	"OPTION_DESCRIPTION_RELOAD_TRANSLATION": "Reload translation texts and fonts and rediscover new languages, if any.",
 	"OPTION_EXPORT_TRANSLATION": "Export current language"
 }

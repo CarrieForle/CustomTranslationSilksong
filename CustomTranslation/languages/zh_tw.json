@@ -1,0 +1,7 @@
+{
+	"NAME": "客製翻譯",
+	"OPTION_OPEN_TRANSLATION_DIRECTORY": "打開翻譯資料夾",
+	"OPTION_RELOAD_TRANSLATION": "重新整理翻譯",
+	"OPTION_DESCRIPTION_RELOAD_TRANSLATION": "重整翻譯文本和字體，查看是否有新語言並讀取。",
+	"OPTION_EXPORT_TRANSLATION": "匯出目前的語言"
+}
