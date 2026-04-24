@@ -210,7 +210,7 @@ jobs:
         artifact-ids: ${{ needs.build.outputs.nexus-artifact-id }}
         skip-decompress: true
     - name: Upload to NexusMods
-      uses: Nexus-Mods/upload-action@v1.0.0-beta.3
+      uses: Nexus-Mods/upload-action@v1.0.0-beta.5
       with:
         api_key: ${{ secrets.NEXUSMODS_API_KEY }}
         file_group_id: ${{ secrets.NEXUSMODS_GROUP }}
@@ -246,7 +246,7 @@ jobs:
         artifact-ids: ${{ needs.build.outputs.nexus-artifact-id }}
         skip-decompress: true
     - name: Release
-      uses: softprops/action-gh-release@v2
+      uses: softprops/action-gh-release@v3
       with:
         draft: false
         generate_release_notes: true
