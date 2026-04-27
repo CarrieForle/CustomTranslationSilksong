@@ -222,7 +222,7 @@ jobs:
     - run: 7z x *.zip -o${{ env.BUILD_DIR }}
     - run: .\package-nexus.ps1
     - name: Upload to NexusMods (all in one)
-      uses: Nexus-Mods/upload-action@v1.0.0-beta.3
+      uses: Nexus-Mods/upload-action@v1.0.0-beta.5
       with:
         api_key: ${{ secrets.NEXUSMODS_API_KEY }}
         file_group_id: ${{ secrets.NEXUSMODS_GROUP_ALL_IN_ONE }}
