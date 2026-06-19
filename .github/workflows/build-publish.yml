@@ -42,7 +42,7 @@ jobs:
       nexus-artifact-id: ${{ steps.nexus-artifact.outputs.artifact-id }}
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Setup .NET
       uses: actions/setup-dotnet@v5
       with:
@@ -118,7 +118,7 @@ jobs:
       THUNDERSTORE_API_KEY: ${{ secrets.THUNDERSTORE_API_KEY }}
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Setup .NET
       uses: actions/setup-dotnet@v5
       with:
@@ -200,7 +200,7 @@ jobs:
       )
     steps:
     # This has to be first because it cleans current directory
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
       with:
         sparse-checkout: package-nexus.ps1
         sparse-checkout-cone-mode: false
