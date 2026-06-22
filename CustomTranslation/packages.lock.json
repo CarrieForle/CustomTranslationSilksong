@@ -82,15 +82,15 @@
       },
       "Silksong.ModMenu": {
         "type": "Direct",
-        "requested": "[0.7.4, )",
-        "resolved": "0.7.4",
-        "contentHash": "mrtB6MoALHIBMtvI9nb9RN3IS+vCfYI9mYpreabG+DpvAuVlrYODo5uVb9xIJGIkP3dPxPyhUymSWYAQL7vF3g==",
+        "requested": "[0.7.5, )",
+        "resolved": "0.7.5",
+        "contentHash": "L+wyajzxjCxYLVpzmTTNvG3Yh56211j0f01I5MdpeaHgSSaQ2R25jJFoAwzvwv/1S1FfG4qFpp1wPRYM2D7a6Q==",
         "dependencies": {
           "BepInEx.Core": "5.4.21",
           "HarmonyX": "2.9.0",
           "Microsoft.CodeAnalysis.Analyzers": "4.14.0",
           "Microsoft.CodeAnalysis.CSharp": "4.8.0",
-          "MonoDetour": "0.7.13",
+          "MonoDetour": "0.7.15",
           "Silksong.UnityHelper": "1.2.0",
           "UnityEngine.Modules": "6000.0.50"
         }
@@ -150,8 +150,8 @@
       },
       "MonoDetour": {
         "type": "Transitive",
-        "resolved": "0.7.13",
-        "contentHash": "A1v0WMKfTbRv3O1l6Myel56AGWfC1SRaXvkXqhLgHL31sttxwMww/ncJS9jpsclqs4hPx8zqcM29AkrqM8WDAg==",
+        "resolved": "0.7.15",
+        "contentHash": "7Ges3MvU0KbFb6kiV/v4EQTGEDcENlYAJlxzaUWCrenJwIBFy65Ebr4yj4AdbASQfMt6zailCAbBSdeXphmmaA==",
         "dependencies": {
           "MonoMod.RuntimeDetour": "21.12.13.1"
         }
