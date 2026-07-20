@@ -20,9 +20,9 @@
       },
       "CustomFontSilksong": {
         "type": "Direct",
-        "requested": "[0.1.1, )",
-        "resolved": "0.1.1",
-        "contentHash": "Ein5M9vsyFIF0wVUQZAOqTy6lhIlla6R8cc6yt+wPm3Zwr6sx+3he3G5en8oovKt9hkcSpnuCzdlf5DlJskDEw==",
+        "requested": "[0.2.0, )",
+        "resolved": "0.2.0",
+        "contentHash": "CeWz4WyvEch/T7WuLT0ugvl/q6/I47//Mi//68aB6hjTuq34kaJVEm147B07a5sOsGPhpOYkJxNSZaIO2ALrRg==",
         "dependencies": {
           "BepInEx.Core": "5.4.21",
           "HarmonyX": "2.9.0",
